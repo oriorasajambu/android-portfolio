@@ -18,7 +18,7 @@
             "text": "Source account confirmed before the cashier scans."
           },
           {
-            "x": 31,
+            "x": 27,
             "y": 67,
             "text": "Expiry countdown, so a stale code is never a surprise."
           }
@@ -38,7 +38,7 @@
             "text": "An explicit waiting state instead of a silent spinner."
           },
           {
-            "x": 13,
+            "x": 6,
             "y": 63,
             "text": "Tells the customer they can leave — the receipt also arrives as a notification."
           }
@@ -53,12 +53,12 @@
         "kind": "illustration",
         "pins": [
           {
-            "x": 13,
+            "x": 6,
             "y": 17,
             "text": "The notification path lands on the same receipt."
           },
           {
-            "x": 13,
+            "x": 6,
             "y": 57,
             "text": "A reference to quote if anything goes wrong."
           }
@@ -86,7 +86,7 @@
             "text": "Actions match the card's current status."
           },
           {
-            "x": 10,
+            "x": 6,
             "y": 58,
             "text": "Details are loaded separately from the card itself."
           }
@@ -121,7 +121,7 @@
         "kind": "illustration",
         "pins": [
           {
-            "x": 10,
+            "x": 6,
             "y": 58,
             "text": "The missing section is filled in — nothing else resets."
           },
@@ -139,7 +139,7 @@
     "id": "tap",
     "label": "QRIS Tap",
     "study": "qris-tap",
-    "showcase": false,
+    "showcase": true,
     "steps": [
       {
         "id": "tap-ready",
@@ -148,7 +148,18 @@
         "alt": "Illustrated screen asking the customer to hold the phone near the reader, with the paying account and an NFC indicator.",
         "caption": "Before reaching the reader, the customer sees which account will pay and that the phone is ready to tap.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 15,
+            "y": 18,
+            "text": "The paying account is clear before the tap."
+          },
+          {
+            "x": 29,
+            "y": 68,
+            "text": "Shows the phone is ready to tap."
+          }
+        ]
       },
       {
         "id": "tap-reading",
@@ -157,7 +168,18 @@
         "alt": "Illustrated screen with a progress ring reading \"Keep holding\" and a note to tap again if the phone moved away too soon.",
         "caption": "While the phone is near the reader, the screen says to hold still and what to do if the tap did not complete.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 50,
+            "y": 33,
+            "text": "Asks the customer to keep holding while the phone talks to the reader."
+          },
+          {
+            "x": 6,
+            "y": 63,
+            "text": "Says what to do if the tap did not complete."
+          }
+        ]
       },
       {
         "id": "tap-done",
@@ -166,7 +188,18 @@
         "alt": "Illustrated receipt for a sample QRIS Tap payment.",
         "caption": "Looking back at the screen, the customer gets a clear result and a receipt, as with any QR payment.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 50,
+            "y": 22,
+            "text": "A clear result when the customer looks back at the screen."
+          },
+          {
+            "x": 6,
+            "y": 58,
+            "text": "The receipt names the payment method."
+          }
+        ]
       }
     ]
   },
@@ -174,7 +207,7 @@
     "id": "transfer",
     "label": "QRIS Transfer",
     "study": "qris-transfer",
-    "showcase": false,
+    "showcase": true,
     "steps": [
       {
         "id": "transfer-scan",
@@ -183,7 +216,18 @@
         "alt": "Illustrated camera screen with a scanning frame around a sample QRIS code.",
         "caption": "The transfer starts from the camera, with a clear target and a message about what to scan.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 22,
+            "y": 21,
+            "text": "A clear target for the camera."
+          },
+          {
+            "x": 6,
+            "y": 68,
+            "text": "Says what kind of code to point at."
+          }
+        ]
       },
       {
         "id": "transfer-confirm",
@@ -192,7 +236,18 @@
         "alt": "Illustrated confirmation screen showing a masked recipient name and bank, a reminder to check the name, and an amount.",
         "caption": "The recipient is shown before any money moves, next to the amount and the paying account.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 18,
+            "y": 20,
+            "text": "The recipient is shown before any money moves."
+          },
+          {
+            "x": 6,
+            "y": 46,
+            "text": "The amount the customer is about to send."
+          }
+        ]
       },
       {
         "id": "transfer-done",
@@ -201,7 +256,18 @@
         "alt": "Illustrated receipt for a sample QRIS Transfer with a reference.",
         "caption": "The completed transfer ends with a receipt and a reference to share or quote later.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 50,
+            "y": 22,
+            "text": "A clear result for the completed transfer."
+          },
+          {
+            "x": 6,
+            "y": 63,
+            "text": "A reference to share or quote later."
+          }
+        ]
       }
     ]
   },
@@ -209,7 +275,7 @@
     "id": "xb",
     "label": "Cross-border QR",
     "study": "cross-border-qr",
-    "showcase": false,
+    "showcase": true,
     "steps": [
       {
         "id": "xb-scan",
@@ -218,7 +284,18 @@
         "alt": "Illustrated screen showing a sample merchant abroad, an amount in Singapore dollars and its approximate rupiah value.",
         "caption": "After scanning, the customer sees the merchant’s amount in its own currency and in rupiah.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 6,
+            "y": 28,
+            "text": "The merchant's amount, in the merchant's currency."
+          },
+          {
+            "x": 46,
+            "y": 33,
+            "text": "Its rupiah equivalent, right next to it."
+          }
+        ]
       },
       {
         "id": "xb-review",
@@ -227,7 +304,18 @@
         "alt": "Illustrated review screen listing the merchant amount, a sample exchange rate and the rupiah amount to pay.",
         "caption": "The review makes clear which amount will be charged to the rupiah account.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 6,
+            "y": 30,
+            "text": "A sample rate, shown before paying."
+          },
+          {
+            "x": 6,
+            "y": 50,
+            "text": "The rupiah amount that will be charged."
+          }
+        ]
       },
       {
         "id": "xb-done",
@@ -236,7 +324,18 @@
         "alt": "Illustrated receipt showing the rupiah amount paid and the merchant amount in Singapore dollars.",
         "caption": "The receipt keeps both amounts so the payment is easy to reconcile later.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 27,
+            "y": 36,
+            "text": "The rupiah amount paid."
+          },
+          {
+            "x": 6,
+            "y": 53,
+            "text": "The merchant amount stays on the receipt."
+          }
+        ]
       }
     ]
   },
@@ -244,7 +343,7 @@
     "id": "cardless",
     "label": "Cardless",
     "study": "cardless",
-    "showcase": false,
+    "showcase": true,
     "steps": [
       {
         "id": "cardless-start",
@@ -253,7 +352,18 @@
         "alt": "Illustrated screen with a withdraw or deposit switch, the paying account and preset amounts.",
         "caption": "The customer chooses withdrawal or deposit, the account and the amount before a code is created.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 9,
+            "y": 18,
+            "text": "Withdraw or deposit is chosen first."
+          },
+          {
+            "x": 6,
+            "y": 42,
+            "text": "The amount is set before a code exists."
+          }
+        ]
       },
       {
         "id": "cardless-code",
@@ -262,7 +372,18 @@
         "alt": "Illustrated screen showing a six-digit sample code to enter at the ATM and a countdown until it expires.",
         "caption": "The code is large and easy to type at the ATM, with its remaining time clearly visible.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 6,
+            "y": 30,
+            "text": "Large digits, easy to type at the ATM."
+          },
+          {
+            "x": 29,
+            "y": 40,
+            "text": "Time left is always visible."
+          }
+        ]
       },
       {
         "id": "cardless-active",
@@ -271,7 +392,18 @@
         "alt": "Illustrated list of two active sample codes, each with its purpose, amount and time left.",
         "caption": "Active codes are listed in one place, each with what it is for and how long it lasts.",
         "kind": "illustration",
-        "pins": []
+        "pins": [
+          {
+            "x": 6,
+            "y": 21,
+            "text": "Time left on every active code."
+          },
+          {
+            "x": 6,
+            "y": 30,
+            "text": "All active codes in one place."
+          }
+        ]
       }
     ]
   }

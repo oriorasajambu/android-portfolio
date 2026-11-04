@@ -54,9 +54,9 @@ test.describe('navigation', () => {
     await expect(page.locator('a[rel="next"]')).toHaveAttribute('href', /work\/qr-payments\/$/);
   });
 
-  test('new studies are not in the homepage showcase', async ({ page }) => {
+  test('showcase offers all six features in study order', async ({ page }) => {
     await page.goto('./');
-    await expect(page.locator('[data-pick]')).toHaveCount(2);
+    await expect(page.locator('[data-pick]')).toHaveText(['QR payments', 'Card management', 'QRIS Tap', 'QRIS Transfer', 'Cross-border QR', 'Cardless']);
   });
 
   test('unknown URL shows recovery links', async ({ page }) => {
@@ -346,10 +346,11 @@ test.describe('without JavaScript', () => {
   test('home shows the complete ordered screen sequence and content', async ({ page }) => {
     await page.goto('./');
     const screens = page.locator('.screen');
-    await expect(screens).toHaveCount(6);
-    for (let i = 0; i < 6; i++) await expect(screens.nth(i).locator('img')).toBeVisible();
+    await expect(screens).toHaveCount(18);
+    for (let i = 0; i < 18; i++) await expect(screens.nth(i).locator('img')).toBeVisible();
     await expect(page.locator('.screen figcaption').first()).toContainText('QR payments · 1/3');
     await expect(page.locator('.screen figcaption').nth(5)).toContainText('Card management · 3/3');
+    await expect(page.locator('.screen figcaption').nth(17)).toContainText('Cardless · 3/3');
     await expect(page.locator('[data-theme-toggle]')).toBeHidden();
     await expect(page.locator('.caption')).toBeHidden();
     await expect(page.locator('.rail')).toBeHidden();
@@ -363,6 +364,62 @@ test.describe('without JavaScript', () => {
     await page.goto('work/card-management/');
     await expect(page.getByRole('heading', { name: 'Loading, partial failure, and recovery' })).toBeVisible();
     await expect(page.locator('.seq img')).toHaveCount(3);
+  });
+});
+
+test.describe('six-feature showcase', () => {
+  test('every feature shows its screens, pins and study link in 2D', async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1366, height: 860 } });
+    const page = await context.newPage();
+    await page.goto('./');
+    const expectations: [string, string, RegExp][] = [
+      ['tap', 'Ready to tap', /work\/qris-tap\/$/],
+      ['transfer', 'Scan the code', /work\/qris-transfer\/$/],
+      ['xb', 'Merchant abroad', /work\/cross-border-qr\/$/],
+      ['cardless', 'Prepare the transaction', /work\/cardless\/$/],
+    ];
+    for (const [id, title, href] of expectations) {
+      await page.locator(`[data-pick="${id}"]`).click();
+      await expect(page.locator('[data-title]')).toHaveText(title);
+      await expect(activeScreen(page)).toHaveAttribute('data-feature', id);
+      await expect(activeScreen(page).locator('img')).toBeVisible();
+      await expect(page.locator('[data-notice] li')).toHaveCount(2);
+      await expect(page.locator('[data-study-link]')).toHaveAttribute('href', href);
+    }
+    await context.close();
+  });
+
+  test('3D loads other features on demand and keeps working', async ({ page }) => {
+    const errors = trackErrors(page);
+    const fetched: string[] = [];
+    page.on('request', (r) => {
+      if (r.resourceType() === 'fetch' && r.url().includes('/showcase/')) fetched.push(r.url().split('/').pop()!);
+    });
+    await page.goto('./');
+    await waitFor3D(page);
+    // Only the first feature's screens are fetched up front.
+    expect(fetched.every((f) => f.startsWith('qr-'))).toBe(true);
+    for (const id of ['cardless', 'xb', 'tap', 'transfer']) {
+      await page.locator(`[data-pick="${id}"]`).click();
+      await page.locator('[data-next]').click();
+      await expect(showcase(page)).toHaveAttribute('data-mode', '3d');
+    }
+    await expect.poll(() => fetched.some((f) => f.startsWith('cardless-'))).toBe(true);
+    await expect(page.locator('[data-title]')).toHaveText('Confirm the recipient');
+    expect(errors).toEqual([]);
+  });
+
+  test('a feature whose 3D screens fail falls back to 2D on that feature', async ({ page }) => {
+    await page.route('**/showcase/xb-*.svg', (route) =>
+      route.request().resourceType() === 'fetch' ? route.abort() : route.continue(),
+    );
+    await page.goto('./');
+    await waitFor3D(page);
+    await page.locator('[data-pick="xb"]').click();
+    await expect(showcase(page)).toHaveAttribute('data-mode', '2d', { timeout: 10_000 });
+    await expect(activeScreen(page)).toHaveAttribute('data-feature', 'xb');
+    await expect(activeScreen(page).locator('img')).toBeVisible();
+    await expect(retryBtn(page)).toBeVisible();
   });
 });
 

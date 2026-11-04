@@ -72,6 +72,7 @@ const DRAG_PITCH = 0.008;
 const MAX_PITCH = 0.7;
 const FRICTION = 0.93; // inertia decay per frame
 const TAU = Math.PI * 2;
+const MAX_CACHED = 2; // features whose screens stay on the GPU
 const TEX_W = 720;
 const TEX_H = 1520;
 
@@ -166,20 +167,54 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
   const disposables: { dispose(): void }[] = [];
   const track = <T extends Material | BufferGeometry | Texture>(x: T): T => (disposables.push(x), x);
 
-  // Load every screen first: any failure falls back to the matching 2D view.
+  // Screens load per feature, on demand; at most MAX_CACHED features stay on the GPU.
+  // The first feature loads before the scene appears: any failure falls back to the matching 2D view.
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
-  const textures = {} as Record<FeatureId, Texture[]>;
+  const cache = new Map<FeatureId, Texture[]>();
+  const inflight = new Map<FeatureId, Promise<Texture[]>>();
+  let current: FeatureId = opts.initial.feature;
+  const loadFeature = (feature: FeatureId): Promise<Texture[]> => {
+    const hit = cache.get(feature);
+    if (hit) {
+      cache.delete(feature); // refresh recency
+      cache.set(feature, hit);
+      return Promise.resolve(hit);
+    }
+    const pending = inflight.get(feature);
+    if (pending) return pending;
+    const list = opts.screens[feature] ?? [];
+    const p = Promise.all(list.map((sc) => loadScreenTexture(sc.url, sc.pins, maxAniso)))
+      .then((texs) => {
+        inflight.delete(feature);
+        if (disposed) {
+          texs.forEach((t) => t.dispose());
+          return texs;
+        }
+        cache.set(feature, texs);
+        for (const [key, old] of cache) {
+          if (cache.size <= MAX_CACHED) break;
+          if (key === feature || key === current) continue;
+          old.forEach((t) => t.dispose());
+          cache.delete(key);
+        }
+        return texs;
+      })
+      .catch((err) => {
+        inflight.delete(feature);
+        throw err;
+      });
+    inflight.set(feature, p);
+    return p;
+  };
+  let disposed = false;
   try {
     await document.fonts?.ready;
-    for (const [feature, list] of Object.entries(opts.screens) as [FeatureId, { url: string; pins: Pin[] }[]][]) {
-      textures[feature] = await Promise.all(list.map((sc) => loadScreenTexture(sc.url, sc.pins, maxAniso)));
-    }
+    await loadFeature(opts.initial.feature);
   } catch (err) {
-    Object.values(textures).flat().forEach((t) => t.dispose());
+    cache.forEach((texs) => texs.forEach((t) => t.dispose()));
     renderer.dispose();
     throw err;
   }
-  Object.values(textures).flat().forEach((t) => track(t));
 
   const scene = new Scene();
   const camera = new PerspectiveCamera(30, 1, 0.1, 50);
@@ -213,7 +248,7 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
   phone.add(body);
 
   const screenGeo = track(new PlaneGeometry(SCREEN_W, SCREEN_H));
-  const screenA = new MeshBasicMaterial({ map: textures[opts.initial.feature]?.[opts.initial.step] ?? null, transparent: true, toneMapped: false });
+  const screenA = new MeshBasicMaterial({ map: cache.get(opts.initial.feature)?.[opts.initial.step] ?? null, transparent: true, toneMapped: false });
   const screenB = new MeshBasicMaterial({ transparent: true, opacity: 0, toneMapped: false });
   track(screenA);
   track(screenB);
@@ -269,7 +304,6 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
   let visible = true;
   let pageVisible = document.visibilityState === 'visible';
   let frame = 0;
-  let disposed = false;
   const tilt = { x: 0, y: 0, tx: 0, ty: 0 };
   // Visitor rotation (drag / flick). yaw spins freely; pitch is clamped.
   const user = { yaw: 0, pitch: 0, vy: 0, vp: 0, scale: 1 };
@@ -285,6 +319,7 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
     }
   };
   let fade: { from: number; start: number; dur: number } | null = null;
+  let latest: { feature: FeatureId; step: number } | null = null;
 
   const resize = () => {
     const { width, height } = host.getBoundingClientRect();
@@ -454,10 +489,24 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
   resize();
   request();
 
-  return {
+  const api: PhoneScene = {
     show(feature, step, o = {}) {
-      const tex = textures[feature]?.[step];
-      if (!tex || disposed) return;
+      if (disposed) return;
+      current = feature;
+      const tex = cache.get(feature)?.[step];
+      if (!tex) {
+        latest = { feature, step };
+        loadFeature(feature)
+          .then(() => {
+            if (!disposed && latest && latest.feature === feature && latest.step === step) {
+              latest = null;
+              api.show(feature, step, o);
+            }
+          })
+          .catch(() => onFailure('Some 3D screens could not load, so the illustrated screens are shown instead.'));
+        return;
+      }
+      latest = null;
       if (o.instant || opts.reducedMotion()) {
         fade = null;
         screenA.map = tex;
@@ -499,8 +548,11 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
       ro.disconnect();
       io.disconnect();
       disposables.forEach((d) => d.dispose());
+      cache.forEach((texs) => texs.forEach((t) => t.dispose()));
+      cache.clear();
       renderer.dispose();
       canvas.remove();
     },
   };
+  return api;
 }

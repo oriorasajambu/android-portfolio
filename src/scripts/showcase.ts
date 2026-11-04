@@ -76,6 +76,7 @@ export function initShowcase(root: HTMLElement): void {
   const title = $<HTMLElement>('[data-title]');
   const caption = $<HTMLElement>('[data-caption]');
   const notice = $<HTMLOListElement>('[data-notice]');
+  const noticeHead = $<HTMLElement>('[data-notice-head]');
   const studyLink = $<HTMLAnchorElement>('[data-study-link]');
   const viewToggle = $<HTMLElement>('[data-view-toggle]');
   const fallback = $<HTMLElement>('[data-fallback]');
@@ -117,7 +118,11 @@ export function initShowcase(root: HTMLElement): void {
       if (on) el.setAttribute('data-active', '');
       else el.removeAttribute('data-active');
     });
-    picks.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset['pick'] === s.feature)));
+    picks.forEach((b) => {
+      const on = b.dataset['pick'] === s.feature;
+      b.setAttribute('aria-pressed', String(on));
+      if (on && lastFeature !== null && lastFeature !== s.feature) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    });
     if (lastFeature !== s.feature) {
       stepBtns.forEach((b, i) => {
         b.querySelector('[data-step-title]')!.textContent = f.steps[i]?.title ?? '';
@@ -135,6 +140,7 @@ export function initShowcase(root: HTMLElement): void {
     title.textContent = step.title;
     caption.textContent = step.caption;
     renderNotice(step.pins);
+    noticeHead.hidden = step.pins.length === 0;
     prev.disabled = s.step === 0;
     next.disabled = s.step === f.steps.length - 1;
 

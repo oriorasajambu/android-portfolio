@@ -2,7 +2,10 @@
 import { getCollection } from 'astro:content';
 import { withBase } from '../lib/url';
 
-const features = (await getCollection('walkthrough', (w) => w.data.showcase)).sort((a, b) => (a.id === 'qr' ? -1 : b.id === 'qr' ? 1 : 0));
+const studyOrder = new Map((await getCollection('studies')).map((s) => [s.id, s.data.order]));
+const features = (await getCollection('walkthrough', (w) => w.data.showcase)).sort(
+  (a, b) => (studyOrder.get(a.data.study) ?? 99) - (studyOrder.get(b.data.study) ?? 99),
+);
 const config = features.map((f) => ({
   id: f.id,
   label: f.data.label,
@@ -88,7 +91,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       <p class="count" data-count>{first.data.label} · 01 / 03</p>
       <h3 data-title>{firstStep.title}</h3>
       <p class="caption-text" data-caption>{firstStep.caption}</p>
-      <p class="notice-head">What to notice</p>
+      <p class="notice-head" data-notice-head>What to notice</p>
       <ol class="notice-list" data-notice>
         {
           firstStep.pins.map((p, i) => (
@@ -167,17 +170,28 @@ const pad = (n: number) => String(n).padStart(2, '0');
     gap: 10px 12px;
   }
   .feature-picker {
-    display: grid;
-    grid-template-columns: auto auto;
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
     gap: 4px;
     padding: 4px;
     border-radius: 999px;
     background: var(--surface-3);
-    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 4px;
+    mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+  }
+  .feature-picker::-webkit-scrollbar {
+    display: none;
   }
   .pick {
+    flex: none;
+    scroll-snap-align: start;
+    white-space: nowrap;
     min-height: 44px;
-    padding: 0.35rem 1rem;
+    padding: 0.35rem 0.95rem;
     border: 0;
     border-radius: 999px;
     background: transparent;
@@ -276,19 +290,19 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
   .pin {
     position: absolute;
-    width: 26px;
-    height: 26px;
-    margin: -13px 0 0 -13px;
+    width: 22px;
+    height: 22px;
+    margin: -11px 0 0 -11px;
     border-radius: 50%;
     background: #166534;
     color: #fff;
-    font-size: 0.78rem;
+    font-size: 0.7rem;
     font-weight: 800;
     display: grid;
     place-items: center;
     box-shadow:
       0 0 0 2px #fff,
-      0 0 0 6px rgb(22 101 52 / 0.25);
+      0 0 0 5px rgb(22 101 52 / 0.25);
   }
   figure {
     margin: 0;
@@ -609,15 +623,11 @@ const pad = (n: number) => String(n).padStart(2, '0');
       grid-template-columns: minmax(0, 1fr);
     }
     .stage {
-      min-height: 440px;
-      padding-bottom: 28px;
+      min-height: 460px;
+      padding-block: 30px 28px;
     }
     .screens {
       width: min(100%, 196px);
-    }
-    .feature-picker {
-      grid-template-columns: 1fr 1fr;
-      width: 100%;
     }
     .view-toggle {
       margin-left: auto;
