@@ -20,7 +20,7 @@ for needle in ["Rio Wirawan", "Senior Android Developer", "riowirawan19@gmail.co
         errors.append(f"missing expected text: {needle!r}")
 
 # Generic patterns only. Exact private values live in the gitignored private/cv-forbidden.txt.
-forbidden = [r"Jl\.\s", r"Canva"]
+forbidden = [r"\bJl\.\s", r"Canva"]
 _private = Path("private/cv-forbidden.txt")
 if _private.exists():
     forbidden += [l.strip() for l in _private.read_text(encoding="utf-8").splitlines() if l.strip()]

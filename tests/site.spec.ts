@@ -116,12 +116,10 @@ test.describe('3D enhancement', () => {
 
   test('missing WebGL 2 keeps the 2D view with an explanation', async ({ page }) => {
     await page.addInitScript(() => {
-      const orig = HTMLCanvasElement.prototype.getContext;
-      // @ts-expect-error test stub
-      HTMLCanvasElement.prototype.getContext = function (type: string, ...rest: unknown[]) {
-        if (type === 'webgl2') return null;
-        // @ts-expect-error passthrough
-        return orig.call(this, type, ...rest);
+      const proto = HTMLCanvasElement.prototype as unknown as { getContext: (type: string, ...rest: unknown[]) => unknown };
+      const orig = proto.getContext;
+      proto.getContext = function (this: HTMLCanvasElement, type: string, ...rest: unknown[]) {
+        return type === 'webgl2' ? null : orig.call(this, type, ...rest);
       };
     });
     await page.goto('./');
