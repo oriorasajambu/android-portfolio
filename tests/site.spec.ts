@@ -347,3 +347,62 @@ test.describe('without JavaScript', () => {
     await expect(page.locator('.seq img')).toHaveCount(3);
   });
 });
+
+test.describe('3D interaction', () => {
+  const pose = (page: Page) =>
+    page.evaluate(() => {
+      const root = document.querySelector('[data-showcase]') as HTMLElement & { __viewer: { getScene(): { getPose(): { yaw: number; pitch: number } } | null } };
+      return root.__viewer.getScene()?.getPose() ?? null;
+    });
+
+  test('dragging rotates the phone and Reset view returns it', async ({ page }) => {
+    const errors = trackErrors(page);
+    await page.goto('./');
+    await waitFor3D(page);
+    const box = (await page.locator('[data-phone-canvas]').boundingBox())!;
+    const cx = box.x + box.width / 2;
+    const cy = box.y + box.height / 2;
+    await page.mouse.move(cx, cy);
+    await page.mouse.down();
+    await page.mouse.move(cx + 120, cy + 30, { steps: 8 });
+    await page.mouse.up();
+    const moved = (await pose(page))!;
+    expect(moved.yaw).toBeGreaterThan(0.8);
+    expect(moved.pitch).toBeGreaterThan(0.1);
+    await expect(page.locator('[data-reset-view]')).toBeVisible();
+
+    await page.locator('[data-reset-view]').click();
+    await expect.poll(async () => Math.abs((await pose(page))!.yaw % (Math.PI * 2)), { timeout: 5000 }).toBeLessThan(0.01);
+    await expect(page.locator('[data-reset-view]')).toBeHidden();
+    // Stepping still works after rotating.
+    await page.locator('[data-next]').click();
+    await expect(page.locator('[data-title]')).toHaveText('Awaiting confirmation');
+    expect(errors).toEqual([]);
+  });
+
+  test('double-click resets the view', async ({ page }) => {
+    await page.goto('./');
+    await waitFor3D(page);
+    const box = (await page.locator('[data-phone-canvas]').boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 - 200, box.y + box.height / 2, { steps: 6 });
+    await page.mouse.up();
+    expect(Math.abs((await pose(page))!.yaw)).toBeGreaterThan(1);
+    await page.mouse.dblclick(box.x + box.width / 2, box.y + box.height / 2);
+    await expect.poll(async () => Math.abs((await pose(page))!.pitch), { timeout: 5000 }).toBeLessThan(0.01);
+    await expect(page.locator('[data-reset-view]')).toBeHidden();
+  });
+
+  test('pitch stays within limits', async ({ page }) => {
+    await page.goto('./');
+    await waitFor3D(page);
+    const box = (await page.locator('[data-phone-canvas]').boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + 20);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height - 20, { steps: 10 });
+    await page.mouse.up();
+    await page.waitForTimeout(600);
+    expect((await pose(page))!.pitch).toBeLessThanOrEqual(0.7 + 1e-6);
+  });
+});

@@ -76,6 +76,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
       <span class="status-chip" data-status-chip hidden></span>
       <span class="label-illustration stage-label" data-js-only>Illustration · synthetic data</span>
       <p class="hint" data-hint data-js-only></p>
+      <button type="button" class="reset-view" data-reset-view hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+          ><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg
+        >
+        Reset view
+      </button>
     </div>
 
     <div class="caption" data-js-only aria-live="polite" aria-atomic="true">
@@ -373,6 +379,26 @@ const pad = (n: number) => String(n).padStart(2, '0');
     bottom: 0;
     z-index: 2;
     background: var(--surface-2);
+  }
+  .reset-view {
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--accent);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: var(--shadow);
   }
   .hint {
     position: absolute;

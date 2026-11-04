@@ -83,6 +83,7 @@ export function initShowcase(root: HTMLElement): void {
   const retry = $<HTMLButtonElement>('[data-retry]');
   const chip = $<HTMLElement>('[data-status-chip]');
   const hint = $<HTMLElement>('[data-hint]');
+  const resetView = $<HTMLButtonElement>('[data-reset-view]');
   const stage = $<HTMLElement>('[data-stage]');
   const host = $<HTMLElement>('[data-canvas-host]');
 
@@ -141,9 +142,9 @@ export function initShowcase(root: HTMLElement): void {
     root.dataset['viewerStatus'] = s.status;
 
     const fine = mq('(pointer: fine)');
-    const reduced = mq('(prefers-reduced-motion: reduce)');
-    if (s.mode === '3d') hint.textContent = fine && !reduced ? 'Move the pointer to tilt · ← → to step' : '3D view · ← → to step';
+    if (s.mode === '3d') hint.textContent = fine ? 'Drag to rotate · double-click to reset · ← → to step' : 'Drag sideways to spin the phone';
     else hint.textContent = webgl && s.status === 'idle' && deviceNeedsOptIn() ? optInReason() : '';
+    if (s.mode !== '3d') resetView.hidden = true;
 
     if (!webgl) {
       viewToggle.hidden = true;
@@ -221,6 +222,9 @@ export function initShowcase(root: HTMLElement): void {
         reducedMotion: () => mq('(prefers-reduced-motion: reduce)'),
         mobile: () => mq('(max-width: 860px)') || mq('(pointer: coarse)'),
         onFailure: (reason) => fail(reason),
+        onPoseChange: (moved) => {
+          resetView.hidden = !moved;
+        },
       });
       if (token !== loadToken) {
         created.dispose();
@@ -250,6 +254,7 @@ export function initShowcase(root: HTMLElement): void {
     }),
   );
   retry.addEventListener('click', () => void enable3D());
+  resetView.addEventListener('click', () => scene?.resetView());
 
   // Automatic enhancement: desktop-class devices only, after content settles and the showcase is visible.
   if (webgl && autoEnhanceAllowed()) {

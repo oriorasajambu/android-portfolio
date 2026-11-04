@@ -8,6 +8,7 @@
 import {
   CanvasTexture,
   Color,
+  CylinderGeometry,
   DirectionalLight,
   ExtrudeGeometry,
   Group,
@@ -44,11 +45,17 @@ export interface PhoneSceneOptions {
   reducedMotion: () => boolean;
   mobile: () => boolean;
   onFailure: (message: string) => void;
+  /** Called when the visitor's rotation moves away from, or returns to, the resting pose. */
+  onPoseChange?: (moved: boolean) => void;
 }
 
 export interface PhoneScene {
   show(feature: FeatureId, step: number, opts?: { instant?: boolean }): void;
   setTheme(dark: boolean): void;
+  /** Ease back to the resting pose. */
+  resetView(): void;
+  /** Current visitor rotation in radians (for tests). */
+  getPose(): { yaw: number; pitch: number };
   dispose(): void;
 }
 
@@ -60,6 +67,11 @@ const MAX_TILT = 0.2; // radians, pointer range
 const REST_X = 0.08; // resting pose: a slight three-quarter view
 const REST_Y = -0.24;
 const TURN_KICK = 0.14; // small turn on each step change
+const DRAG_YAW = 0.011; // radians per CSS px
+const DRAG_PITCH = 0.008;
+const MAX_PITCH = 0.7;
+const FRICTION = 0.93; // inertia decay per frame
+const TAU = Math.PI * 2;
 const TEX_W = 720;
 const TEX_H = 1520;
 
@@ -216,8 +228,42 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
   const sideBtn = new Mesh(btnGeo, btnMat);
   sideBtn.position.set(PHONE_W / 2 + 0.04, 0.9, -0.05);
   phone.add(sideBtn);
+  const volBtn = new Mesh(btnGeo, btnMat);
+  volBtn.scale.set(1, 0.6, 1);
+  volBtn.position.set(PHONE_W / 2 + 0.04, 0.25, -0.05);
+  phone.add(volBtn);
+
+  // Back of the phone: a camera module, so spinning it around shows a real back.
+  const BACK_Z = -0.1 - 0.04; // body back face incl. bevel
+  const moduleMat = track(new MeshStandardMaterial({ color: '#141a16', roughness: 0.3, metalness: 0.5 }));
+  const moduleGeo = track(
+    new ExtrudeGeometry(roundedRect(0.66, 0.66, 0.16), { depth: 0.04, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 2 }),
+  );
+  const cameraModule = new Mesh(moduleGeo, moduleMat);
+  cameraModule.position.set(PHONE_W / 2 - 0.5, PHONE_H / 2 - 0.5, BACK_Z - 0.05);
+  phone.add(cameraModule);
+  const lensGeo = track(new CylinderGeometry(0.11, 0.11, 0.04, 32));
+  const lensMat = track(new MeshStandardMaterial({ color: '#05080a', roughness: 0.1, metalness: 0.8 }));
+  const ringMat = track(new MeshStandardMaterial({ color: '#56625b', roughness: 0.35, metalness: 0.9 }));
+  const ringGeo = track(new CylinderGeometry(0.135, 0.135, 0.03, 32));
+  const lensSpots: [number, number][] = [[-0.14, 0.14], [0.14, 0.14], [-0.14, -0.14]];
+  for (const [dx, dy] of lensSpots) {
+    const ring = new Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(cameraModule.position.x + dx, cameraModule.position.y + dy, BACK_Z - 0.07);
+    const lens = new Mesh(lensGeo, lensMat);
+    lens.rotation.x = Math.PI / 2;
+    lens.position.set(ring.position.x, ring.position.y, BACK_Z - 0.08);
+    phone.add(ring, lens);
+  }
+  const flashGeo = track(new CylinderGeometry(0.04, 0.04, 0.02, 20));
+  const flash = new Mesh(flashGeo, track(new MeshStandardMaterial({ color: '#e8e2c8', roughness: 0.4, emissive: '#3a3628' })));
+  flash.rotation.x = Math.PI / 2;
+  flash.position.set(cameraModule.position.x + 0.14, cameraModule.position.y - 0.14, BACK_Z - 0.07);
+  phone.add(flash);
 
   host.replaceChildren(canvas);
+  canvas.style.cursor = 'grab';
 
   // ---------- rendering on demand ----------
   let visible = true;
@@ -225,6 +271,19 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
   let frame = 0;
   let disposed = false;
   const tilt = { x: 0, y: 0, tx: 0, ty: 0 };
+  // Visitor rotation (drag / flick). yaw spins freely; pitch is clamped.
+  const user = { yaw: 0, pitch: 0, vy: 0, vp: 0, scale: 1 };
+  let drag: { id: number; x: number; y: number; type: string } | null = null;
+  let resetting = false;
+  let moved = false;
+  const notifyPose = () => {
+    const rel = ((user.yaw % TAU) + TAU) % TAU;
+    const off = Math.min(rel, TAU - rel) > 0.03 || Math.abs(user.pitch) > 0.03;
+    if (off !== moved) {
+      moved = off;
+      opts.onPoseChange?.(moved);
+    }
+  };
   let fade: { from: number; start: number; dur: number } | null = null;
 
   const resize = () => {
@@ -235,7 +294,7 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
     camera.aspect = width / height;
     // Fit the phone height into view.
     const t = Math.tan((camera.fov * Math.PI) / 360);
-    camera.position.z = Math.max((PHONE_H / 2 + 0.3) / t, (PHONE_W / 2 + 0.4) / (t * camera.aspect));
+    camera.position.z = Math.max((PHONE_H / 2 + 0.5) / t, (PHONE_W / 2 + 0.4) / (t * camera.aspect));
     camera.updateProjectionMatrix();
   };
 
@@ -248,7 +307,31 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
     tilt.x += (tilt.tx - tilt.x) * k;
     tilt.y += (tilt.ty - tilt.y) * k;
     if (Math.abs(tilt.tx - tilt.x) > 1e-4 || Math.abs(tilt.ty - tilt.y) > 1e-4) animating = true;
-    phone.rotation.set(REST_X + tilt.x, REST_Y + tilt.y, 0);
+
+    const reduced = opts.reducedMotion();
+    if (resetting) {
+      const target = Math.round(user.yaw / TAU) * TAU;
+      const r = reduced ? 1 : 0.16;
+      user.yaw += (target - user.yaw) * r;
+      user.pitch += (0 - user.pitch) * r;
+      if (Math.abs(target - user.yaw) < 1e-3 && Math.abs(user.pitch) < 1e-3) {
+        user.yaw = 0;
+        user.pitch = 0;
+        resetting = false;
+      } else animating = true;
+    } else if (!drag && (Math.abs(user.vy) > 1e-4 || Math.abs(user.vp) > 1e-4)) {
+      user.yaw += user.vy;
+      user.pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, user.pitch + user.vp));
+      user.vy *= FRICTION;
+      user.vp *= FRICTION;
+      animating = true;
+    }
+    const targetScale = drag && !reduced ? 1.035 : 1;
+    user.scale += (targetScale - user.scale) * (reduced ? 1 : 0.2);
+    if (Math.abs(targetScale - user.scale) > 1e-4) animating = true;
+    phone.scale.setScalar(user.scale);
+    phone.rotation.set(REST_X + tilt.x + user.pitch, REST_Y + tilt.y + user.yaw, 0);
+    notifyPose();
 
     if (fade) {
       const t = Math.min(1, (now - fade.start) / fade.dur);
@@ -272,7 +355,7 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
 
   // ---------- pointer tilt (fine pointers, motion allowed) ----------
   const onMove = (e: PointerEvent) => {
-    if (e.pointerType !== 'mouse' || opts.reducedMotion()) return;
+    if (drag || e.pointerType !== 'mouse' || opts.reducedMotion()) return;
     const r = stage.getBoundingClientRect();
     const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
     const ny = ((e.clientY - r.top) / r.height) * 2 - 1;
@@ -287,6 +370,59 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
   };
   stage.addEventListener('pointermove', onMove);
   stage.addEventListener('pointerleave', onLeave);
+
+  // ---------- drag to rotate (mouse: both axes; touch: sideways only, vertical scroll stays native) ----------
+  const onDown = (e: PointerEvent) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, type: e.pointerType };
+    try {
+      canvas.setPointerCapture(e.pointerId);
+    } catch {
+      /* synthetic pointers may not be capturable */
+    }
+    resetting = false;
+    user.vy = 0;
+    user.vp = 0;
+    tilt.tx = 0;
+    tilt.ty = 0;
+    canvas.style.cursor = 'grabbing';
+    request();
+  };
+  const onDrag = (e: PointerEvent) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x;
+    const dy = e.clientY - drag.y;
+    drag.x = e.clientX;
+    drag.y = e.clientY;
+    user.yaw += dx * DRAG_YAW;
+    user.vy = dx * DRAG_YAW;
+    if (drag.type !== 'touch') {
+      user.pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, user.pitch + dy * DRAG_PITCH));
+      user.vp = dy * DRAG_PITCH;
+    }
+    request();
+  };
+  const onUp = (e: PointerEvent) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    drag = null;
+    canvas.style.cursor = 'grab';
+    if (opts.reducedMotion() || e.type === 'pointercancel') {
+      user.vy = 0;
+      user.vp = 0;
+    }
+    request();
+  };
+  const reset = () => {
+    user.vy = 0;
+    user.vp = 0;
+    resetting = true;
+    request();
+  };
+  canvas.addEventListener('pointerdown', onDown);
+  canvas.addEventListener('pointermove', onDrag);
+  canvas.addEventListener('pointerup', onUp);
+  canvas.addEventListener('pointercancel', onUp);
+  canvas.addEventListener('dblclick', reset);
 
   const ro = new ResizeObserver(() => {
     resize();
@@ -340,6 +476,8 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
       }
       request();
     },
+    resetView: reset,
+    getPose: () => ({ yaw: user.yaw, pitch: user.pitch }),
     setTheme(dark) {
       rim.intensity = dark ? 3.2 : 0;
       bodyMat.color.set(dark ? '#3a4740' : '#1d2621');
@@ -351,6 +489,11 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
       if (frame) cancelAnimationFrame(frame);
       stage.removeEventListener('pointermove', onMove);
       stage.removeEventListener('pointerleave', onLeave);
+      canvas.removeEventListener('pointerdown', onDown);
+      canvas.removeEventListener('pointermove', onDrag);
+      canvas.removeEventListener('pointerup', onUp);
+      canvas.removeEventListener('pointercancel', onUp);
+      canvas.removeEventListener('dblclick', reset);
       document.removeEventListener('visibilitychange', onVisibility);
       canvas.removeEventListener('webglcontextlost', onLost);
       ro.disconnect();
