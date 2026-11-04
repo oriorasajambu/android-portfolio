@@ -47,8 +47,6 @@ const capabilities = [
 ];
 
 const supporting = ['MPM and CPM QR payments', 'Account details', 'Virtual card number', 'Point transfers'];
-const featured = studies.slice(0, 2);
-const more = studies.slice(2);
 ---
 
 <Base
@@ -83,13 +81,12 @@ const more = studies.slice(2);
       <div class="section-head">
         <p class="eyebrow">Selected work</p>
         <h2 id="work-title">Feature studies from OctoMobile</h2>
-        <p>All {studies.length} come from the same mobile-banking product and describe my implementation work on the Android client. The first two go deepest.</p>
+        <p>All {studies.length} come from the same mobile-banking product and describe my implementation work on the Android client.</p>
       </div>
-      {[featured, more].map((group, gi) => (
-      <div class={gi === 0 ? 'studies' : 'studies more-studies'}>
+      <div class="studies">
         {
-          group.map((s) => (
-            <article class={gi === 0 ? 'card study' : 'card study compact'}>
+          studies.map((s) => (
+            <article class="card study">
               <div class="previews" aria-hidden="true">
                 {previewsFor(s.data.walkthrough).map((src) => (
                   <img src={src} alt="" width="360" height="760" loading="lazy" decoding="async" />
@@ -102,18 +99,15 @@ const more = studies.slice(2);
                 <a href={withBase(`work/${s.id}/`)}>{s.data.title}</a>
               </h3>
               <p>{s.data.summary}</p>
-              {gi === 0 && (
-                <ul class="chips">
-                  {s.data.technologies.map((t) => <li>{t}</li>)}
-                </ul>
-              )}
+              <ul class="chips">
+                {s.data.technologies.map((t) => <li>{t}</li>)}
+              </ul>
               <span class="more" aria-hidden="true">Read the study →</span>
               </div>
             </article>
           ))
         }
       </div>
-      ))}
       <div class="supporting">
         <h3>Other OctoMobile work</h3>
         <ul class="chips">{supporting.map((s) => <li>{s}</li>)}</ul>
@@ -245,8 +239,13 @@ const more = studies.slice(2);
   }
   .studies {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
+  }
+  @media (max-width: 760px) {
+    .studies {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
   .study {
     position: relative;
@@ -361,33 +360,6 @@ const more = studies.slice(2);
     margin-top: 0.75rem;
     font-weight: 700;
     color: var(--accent);
-  }
-  .more-studies {
-    margin-top: 1.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
-  }
-  .compact .previews {
-    height: 150px;
-    padding-top: 18px;
-    gap: 8px;
-  }
-  .compact .previews img {
-    width: 78px;
-    border-width: 4px;
-    border-radius: 14px;
-  }
-  .compact .previews .label-illustration {
-    display: none;
-  }
-  .compact .study-body {
-    padding: 20px 22px 22px;
-  }
-  .compact h3 {
-    font-size: 1.12rem;
-  }
-  .compact p:not(.eyebrow) {
-    font-size: 0.94rem;
-    color: var(--ink-2);
   }
   .supporting {
     margin-top: 2.5rem;
