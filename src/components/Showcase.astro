@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import { withBase } from '../lib/url';
 
-const features = (await getCollection('walkthrough')).sort((a, b) => (a.id === 'qr' ? -1 : b.id === 'qr' ? 1 : 0));
+const features = (await getCollection('walkthrough', (w) => w.data.showcase)).sort((a, b) => (a.id === 'qr' ? -1 : b.id === 'qr' ? 1 : 0));
 const config = features.map((f) => ({
   id: f.id,
   label: f.data.label,

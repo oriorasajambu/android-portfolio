@@ -1,6 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
 import { withBase } from '../lib/url';
+
+const studies = (await getCollection('studies')).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <Base title="Page not found — Rio Wirawan" description="This page does not exist." noindex>
@@ -10,8 +13,7 @@ import { withBase } from '../lib/url';
     <p class="lead">The link may be out of date. These pages are:</p>
     <ul>
       <li><a href={withBase()}>Home</a></li>
-      <li><a href={withBase('work/qr-payments/')}>QR payments and receipt feedback</a></li>
-      <li><a href={withBase('work/card-management/')}>Card management under partial failure</a></li>
+      {studies.map((s) => <li><a href={withBase(`work/${s.id}/`)}>{s.data.title}</a></li>)}
       <li><a href={withBase('#contact')}>Contact</a></li>
     </ul>
   </section>

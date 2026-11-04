@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+const STUDIES = ['qr-payments', 'card-management', 'qris-tap', 'qris-transfer', 'cross-border-qr', 'cardless'];
+
 const showcase = (page: Page) => page.locator('[data-showcase]');
 const activeScreen = (page: Page) => page.locator('.screen[data-active]');
 const view3d = (page: Page) => page.locator('[data-view="3d"]');
@@ -31,7 +33,7 @@ test.describe('navigation', () => {
     expect(errors).toEqual([]);
   });
 
-  for (const slug of ['qr-payments', 'card-management']) {
+  for (const slug of STUDIES) {
     test(`direct study URL and refresh: ${slug}`, async ({ page }) => {
       const res = await page.goto(`work/${slug}/`);
       expect(res?.status()).toBe(200);
@@ -42,9 +44,25 @@ test.describe('navigation', () => {
     });
   }
 
+  test('homepage links every study, and study pages chain previous/next', async ({ page }) => {
+    await page.goto('./');
+    for (const slug of STUDIES) await expect(page.locator(`#work a[href$="/work/${slug}/"]`)).toHaveCount(1);
+    await page.goto('work/qris-tap/');
+    await expect(page.locator('a[rel="prev"]')).toHaveAttribute('href', /work\/card-management\/$/);
+    await expect(page.locator('a[rel="next"]')).toHaveAttribute('href', /work\/qris-transfer\/$/);
+    await page.goto('work/cardless/');
+    await expect(page.locator('a[rel="next"]')).toHaveAttribute('href', /work\/qr-payments\/$/);
+  });
+
+  test('new studies are not in the homepage showcase', async ({ page }) => {
+    await page.goto('./');
+    await expect(page.locator('[data-pick]')).toHaveCount(2);
+  });
+
   test('unknown URL shows recovery links', async ({ page }) => {
     await page.goto('does-not-exist/');
     await expect(page.getByRole('heading', { name: "This page isn't here." })).toBeVisible();
+    for (const slug of STUDIES) await expect(page.locator(`a[href$="/work/${slug}/"]`)).toHaveCount(1);
     await page.getByRole('link', { name: 'Card management under partial failure' }).click();
     await expect(page).toHaveURL(/work\/card-management\/$/);
   });
@@ -59,7 +77,7 @@ test.describe('navigation', () => {
   });
 
   test('every image has alternative text', async ({ page }) => {
-    for (const path of ['./', 'work/qr-payments/', 'work/card-management/']) {
+    for (const path of ['./', ...STUDIES.map((s) => `work/${s}/`)]) {
       await page.goto(path);
       expect(await page.locator('img:not([alt])').count(), path).toBe(0);
       // Content images need a real description; empty alt is only for decorative previews.

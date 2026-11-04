@@ -2,7 +2,7 @@
  * Shared showcase state. The HTML gallery and the Three.js scene both render from this,
  * so feature/step selection survives switching modes or recovering from a 3D failure.
  */
-export type FeatureId = 'qr' | 'cards';
+export type FeatureId = string;
 export type DisplayMode = '2d' | '3d';
 export type Status = 'idle' | 'loading' | 'ready' | 'error';
 

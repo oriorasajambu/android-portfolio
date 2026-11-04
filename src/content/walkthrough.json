@@ -64,7 +64,8 @@
           }
         ]
       }
-    ]
+    ],
+    "showcase": true
   },
   {
     "id": "cards",
@@ -130,6 +131,147 @@
             "text": "A quiet confirmation instead of a full-screen refresh."
           }
         ]
+      }
+    ],
+    "showcase": true
+  },
+  {
+    "id": "tap",
+    "label": "QRIS Tap",
+    "study": "qris-tap",
+    "showcase": false,
+    "steps": [
+      {
+        "id": "tap-ready",
+        "title": "Ready to tap",
+        "image": "showcase/tap-ready.svg",
+        "alt": "Illustrated screen asking the customer to hold the phone near the reader, with the paying account and an NFC indicator.",
+        "caption": "Before reaching the reader, the customer sees which account will pay and that the phone is ready to tap.",
+        "kind": "illustration",
+        "pins": []
+      },
+      {
+        "id": "tap-reading",
+        "title": "Keep holding",
+        "image": "showcase/tap-reading.svg",
+        "alt": "Illustrated screen with a progress ring reading \"Keep holding\" and a note to tap again if the phone moved away too soon.",
+        "caption": "While the phone is near the reader, the screen says to hold still and what to do if the tap did not complete.",
+        "kind": "illustration",
+        "pins": []
+      },
+      {
+        "id": "tap-done",
+        "title": "Receipt",
+        "image": "showcase/tap-done.svg",
+        "alt": "Illustrated receipt for a sample QRIS Tap payment.",
+        "caption": "Looking back at the screen, the customer gets a clear result and a receipt, as with any QR payment.",
+        "kind": "illustration",
+        "pins": []
+      }
+    ]
+  },
+  {
+    "id": "transfer",
+    "label": "QRIS Transfer",
+    "study": "qris-transfer",
+    "showcase": false,
+    "steps": [
+      {
+        "id": "transfer-scan",
+        "title": "Scan the code",
+        "image": "showcase/transfer-scan.svg",
+        "alt": "Illustrated camera screen with a scanning frame around a sample QRIS code.",
+        "caption": "The transfer starts from the camera, with a clear target and a message about what to scan.",
+        "kind": "illustration",
+        "pins": []
+      },
+      {
+        "id": "transfer-confirm",
+        "title": "Confirm the recipient",
+        "image": "showcase/transfer-confirm.svg",
+        "alt": "Illustrated confirmation screen showing a masked recipient name and bank, a reminder to check the name, and an amount.",
+        "caption": "The recipient is shown before any money moves, next to the amount and the paying account.",
+        "kind": "illustration",
+        "pins": []
+      },
+      {
+        "id": "transfer-done",
+        "title": "Transfer receipt",
+        "image": "showcase/transfer-done.svg",
+        "alt": "Illustrated receipt for a sample QRIS Transfer with a reference.",
+        "caption": "The completed transfer ends with a receipt and a reference to share or quote later.",
+        "kind": "illustration",
+        "pins": []
+      }
+    ]
+  },
+  {
+    "id": "xb",
+    "label": "Cross-border QR",
+    "study": "cross-border-qr",
+    "showcase": false,
+    "steps": [
+      {
+        "id": "xb-scan",
+        "title": "Merchant abroad",
+        "image": "showcase/xb-scan.svg",
+        "alt": "Illustrated screen showing a sample merchant abroad, an amount in Singapore dollars and its approximate rupiah value.",
+        "caption": "After scanning, the customer sees the merchant’s amount in its own currency and in rupiah.",
+        "kind": "illustration",
+        "pins": []
+      },
+      {
+        "id": "xb-review",
+        "title": "Review the conversion",
+        "image": "showcase/xb-review.svg",
+        "alt": "Illustrated review screen listing the merchant amount, a sample exchange rate and the rupiah amount to pay.",
+        "caption": "The review makes clear which amount will be charged to the rupiah account.",
+        "kind": "illustration",
+        "pins": []
+      },
+      {
+        "id": "xb-done",
+        "title": "Receipt in both currencies",
+        "image": "showcase/xb-done.svg",
+        "alt": "Illustrated receipt showing the rupiah amount paid and the merchant amount in Singapore dollars.",
+        "caption": "The receipt keeps both amounts so the payment is easy to reconcile later.",
+        "kind": "illustration",
+        "pins": []
+      }
+    ]
+  },
+  {
+    "id": "cardless",
+    "label": "Cardless",
+    "study": "cardless",
+    "showcase": false,
+    "steps": [
+      {
+        "id": "cardless-start",
+        "title": "Prepare the transaction",
+        "image": "showcase/cardless-start.svg",
+        "alt": "Illustrated screen with a withdraw or deposit switch, the paying account and preset amounts.",
+        "caption": "The customer chooses withdrawal or deposit, the account and the amount before a code is created.",
+        "kind": "illustration",
+        "pins": []
+      },
+      {
+        "id": "cardless-code",
+        "title": "Your code",
+        "image": "showcase/cardless-code.svg",
+        "alt": "Illustrated screen showing a six-digit sample code to enter at the ATM and a countdown until it expires.",
+        "caption": "The code is large and easy to type at the ATM, with its remaining time clearly visible.",
+        "kind": "illustration",
+        "pins": []
+      },
+      {
+        "id": "cardless-active",
+        "title": "Active codes",
+        "image": "showcase/cardless-active.svg",
+        "alt": "Illustrated list of two active sample codes, each with its purpose, amount and time left.",
+        "caption": "Active codes are listed in one place, each with what it is for and how long it lasts.",
+        "kind": "illustration",
+        "pins": []
       }
     ]
   }

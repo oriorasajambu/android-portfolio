@@ -213,7 +213,7 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
   phone.add(body);
 
   const screenGeo = track(new PlaneGeometry(SCREEN_W, SCREEN_H));
-  const screenA = new MeshBasicMaterial({ map: textures[opts.initial.feature][opts.initial.step] ?? null, transparent: true, toneMapped: false });
+  const screenA = new MeshBasicMaterial({ map: textures[opts.initial.feature]?.[opts.initial.step] ?? null, transparent: true, toneMapped: false });
   const screenB = new MeshBasicMaterial({ transparent: true, opacity: 0, toneMapped: false });
   track(screenA);
   track(screenB);

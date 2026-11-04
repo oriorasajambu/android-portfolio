@@ -47,7 +47,7 @@ const studies = defineCollection({
     teamBoundary: nonEmpty,
     responsibilities: z.array(nonEmpty).min(1),
     technologies: z.array(nonEmpty).min(1),
-    walkthrough: z.enum(['qr', 'cards']),
+    walkthrough: z.string().regex(/^[a-z0-9-]+$/),
     diagram: z.object({ src: z.string().regex(/^diagrams\/[\w-]+\.svg$/), alt: nonEmpty, caption: nonEmpty }),
   }),
 });
@@ -57,7 +57,9 @@ const walkthrough = defineCollection({
   loader: file('src/content/walkthrough.json'),
   schema: z.object({
     label: nonEmpty,
-    study: z.enum(['qr-payments', 'card-management']),
+    study: z.string().regex(/^[a-z0-9-]+$/),
+    /** Feature appears in the homepage 3D showcase. */
+    showcase: z.boolean().default(false),
     steps: z
       .array(
         z.object({
@@ -70,7 +72,8 @@ const walkthrough = defineCollection({
           /** Numbered callouts on the screen; x/y are percentages of the screen. */
           pins: z
             .array(z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100), text: nonEmpty }))
-            .max(3),
+            .max(3)
+            .default([]),
         }),
       )
       .length(3),

@@ -13,7 +13,10 @@ const study = (await getEntry('studies', slug!))!;
 const { Content } = await render(study);
 const d = study.data;
 const walk = (await getEntry('walkthrough', d.walkthrough))!.data;
-const others = (await getCollection('studies')).filter((s) => s.id !== study.id);
+const all = (await getCollection('studies')).sort((a, b) => a.data.order - b.data.order);
+const idx = all.findIndex((s) => s.id === study.id);
+const prevStudy = idx > 0 ? all[idx - 1] : undefined;
+const nextStudy = all[(idx + 1) % all.length];
 ---
 
 <Base title={`${d.title} — Rio Wirawan`} description={d.summary} path={`work/${study.id}/`}>
@@ -74,12 +77,20 @@ const others = (await getCollection('studies')).filter((s) => s.id !== study.id)
 
     <nav class="wrap next" aria-label="More work">
       {
-        others.map((o) => (
-          <a class="card next-card" href={withBase(`work/${o.id}/`)}>
-            <span class="eyebrow">Next study</span>
-            <span class="t">{o.data.title} →</span>
+        prevStudy && (
+          <a class="card next-card" href={withBase(`work/${prevStudy.id}/`)} rel="prev">
+            <span class="eyebrow">Previous study</span>
+            <span class="t">← {prevStudy.data.title}</span>
           </a>
-        ))
+        )
+      }
+      {
+        nextStudy && nextStudy.id !== study.id && (
+          <a class="card next-card" href={withBase(`work/${nextStudy.id}/`)} rel="next">
+            <span class="eyebrow">{idx === all.length - 1 ? 'Back to the first study' : 'Next study'}</span>
+            <span class="t">{nextStudy.data.title} →</span>
+          </a>
+        )
       }
       <a class="card next-card" href={withBase('#contact')}>
         <span class="eyebrow">Get in touch</span>
