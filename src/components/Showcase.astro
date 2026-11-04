@@ -202,22 +202,26 @@ const first = features[0]!;
   }
   .panel {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.5rem;
     align-content: center;
   }
   .feature-picker {
-    display: inline-flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto auto;
     gap: 0.25rem;
+    justify-self: start;
+    width: max-content;
+    max-width: 100%;
     padding: 0.3rem;
     border-radius: 999px;
     background: var(--surface-2);
-    justify-self: start;
   }
   .pick {
     min-height: 44px;
-    padding: 0 1rem;
-    white-space: nowrap;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.94rem;
+    line-height: 1.2;
     border: 0;
     border-radius: 999px;
     background: transparent;
@@ -270,7 +274,7 @@ const first = features[0]!;
   }
   @media (max-width: 860px) {
     .showcase {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
     .stage {
       width: min(100%, 280px);

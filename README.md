@@ -52,7 +52,7 @@ Every walkthrough step has a `kind` of either `illustration` or `approved-image`
 npm run cv:build && npm run check:cv
 ```
 
-`check:cv` does two things. It extracts the PDF text to confirm the expected content is there and the private details are not. It also confirms that the only metadata keys are Title and Author. After regenerating, check the PDF visually as well. The original CV is kept **outside** this repository.
+`check:cv` reads exact private values (the old phone number and address) from `private/cv-forbidden.txt`. That file is gitignored and exists only on the author's machine. On any other clone, and in CI, only the generic checks run. `check:cv` does two things. It extracts the PDF text to confirm the expected content is there and the private details are not. It also confirms that the only metadata keys are Title and Author. After regenerating, check the PDF visually as well. The original CV is kept **outside** this repository.
 
 The social image `public/og.png` comes from `node scripts/build-og.mjs`.
 
@@ -79,7 +79,18 @@ The workflow is `.github/workflows/deploy.yml`.
 
 ### Rollback
 
-Go to **Actions → Deploy to GitHub Pages**, open the last successful run, and choose **Re-run all jobs**. That redeploys the commit's artifact. You can also revert the bad commit and push it to `main`.
+Each build uploads its Pages artifact and keeps it for 30 days. To roll back to an earlier version without rebuilding:
+
+1. Go to **Actions → Deploy to GitHub Pages** and open the last good run.
+2. Re-run **only the `deploy` job**. It reuses that run's artifact.
+
+The CLI equivalent:
+
+```bash
+gh run rerun <run-id> --job <deploy-job-id>
+```
+
+Once the artifact has expired, revert the bad commit and push it to `main` instead.
 
 ### Dependency updates
 

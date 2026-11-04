@@ -45,7 +45,7 @@ ${p.experience
 <div class="cols">
 <div><h2>Education</h2>${p.education.map((ed) => `<div><strong>${esc(ed.title)}</strong><br><span class="small">${esc(ed.org)} · ${esc(ed.period)}</span></div>`).join('')}
 <h2>Languages</h2><div>${p.languages.map(esc).join(' · ')}</div></div>
-<div><h2>Courses</h2><ul>${p.courses.map((c) => `<li>${esc(c.title)} <span class="small">— ${esc(c.provider)}, ${c.year}</span></li>`).join('')}</ul></div>
+<div><h2>Courses</h2><ul>${p.courses.map((c) => `<li>${esc(c.title)} <span class="small">— ${c.provider ? `${esc(c.provider)}, ` : ''}${c.year}</span></li>`).join('')}</ul></div>
 </div>
 </body></html>`;
 

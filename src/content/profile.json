@@ -52,7 +52,7 @@
       { "title": "Bachelor of Science", "org": "Universitas Pembangunan Pancabudi", "period": "2020 – 2025" }
     ],
     "courses": [
-      { "title": "The Complete Android 12 & Kotlin Development Masterclass", "provider": "Online course", "year": 2022 },
+      { "title": "The Complete Android 12 & Kotlin Development Masterclass", "year": 2022 },
       { "title": "Kotlin Programming", "provider": "Dicoding", "year": 2022 },
       { "title": "Theoretical and Practical Understanding of Kotlin", "provider": "Sololearn", "year": 2022 },
       { "title": "SQL", "provider": "Sololearn", "year": 2022 },

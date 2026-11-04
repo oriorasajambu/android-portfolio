@@ -99,7 +99,7 @@ const supporting = ['MPM and CPM QR payments', 'QRIS Tap', 'QRIS Transfer', 'Cro
         }
       </div>
       <div class="supporting">
-        <h3>Also shipped on OctoMobile</h3>
+        <h3>Other OctoMobile work</h3>
         <ul class="chips">{supporting.map((s) => <li>{s}</li>)}</ul>
       </div>
     </div>
@@ -169,7 +169,7 @@ const supporting = ['MPM and CPM QR payments', 'QRIS Tap', 'QRIS Transfer', 'Cro
               <li>
                 <span>{c.title}</span>
                 <span class="period">
-                  {c.provider} · {c.year}
+                  {c.provider ? `${c.provider} · ${c.year}` : c.year}
                 </span>
               </li>
             ))
@@ -209,7 +209,7 @@ const supporting = ['MPM and CPM QR payments', 'QRIS Tap', 'QRIS Transfer', 'Cro
   }
   .hero-grid {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
     gap: clamp(32px, 5vw, 72px);
     align-items: center;
   }
@@ -219,9 +219,9 @@ const supporting = ['MPM and CPM QR payments', 'QRIS Tap', 'QRIS Transfer', 'Cro
     gap: 0.75rem;
     margin: 2rem 0 1.75rem;
   }
-  @media (max-width: 1000px) {
+  @media (max-width: 1100px) {
     .hero-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
   .alt {

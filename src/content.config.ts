@@ -28,7 +28,7 @@ const profile = defineCollection({
       )
       .min(1),
     education: z.array(z.object({ title: nonEmpty, org: nonEmpty, period: nonEmpty })).min(1),
-    courses: z.array(z.object({ title: nonEmpty, provider: nonEmpty, year: z.number().int() })),
+    courses: z.array(z.object({ title: nonEmpty, provider: nonEmpty.optional(), year: z.number().int() })),
   }),
 });
 
