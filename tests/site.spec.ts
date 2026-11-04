@@ -2,7 +2,10 @@ import { expect, test, type Page } from '@playwright/test';
 
 const showcase = (page: Page) => page.locator('[data-showcase]');
 const activeScreen = (page: Page) => page.locator('.screen[data-active]');
-const modeToggle = (page: Page) => page.locator('[data-mode-toggle]');
+const view3d = (page: Page) => page.locator('[data-view="3d"]');
+const view2d = (page: Page) => page.locator('[data-view="2d"]');
+const viewToggle = (page: Page) => page.locator('[data-view-toggle]');
+const retryBtn = (page: Page) => page.locator('[data-retry]');
 const statusMsg = (page: Page) => page.locator('[data-status-msg]');
 
 function trackErrors(page: Page): string[] {
@@ -58,8 +61,9 @@ test.describe('navigation', () => {
   test('every image has alternative text', async ({ page }) => {
     for (const path of ['./', 'work/qr-payments/', 'work/card-management/']) {
       await page.goto(path);
-      const missing = await page.locator('img:not([alt]), img[alt=""]').count();
-      expect(missing, path).toBe(0);
+      expect(await page.locator('img:not([alt])').count(), path).toBe(0);
+      // Content images need a real description; empty alt is only for decorative previews.
+      expect(await page.locator('.screen img[alt=""], .seq img[alt=""], .diagram img[alt=""]').count(), path).toBe(0);
     }
   });
 });
@@ -72,7 +76,10 @@ test.describe('showcase selection', () => {
     await expect(activeScreen(page)).toHaveAttribute('data-feature', 'qr');
     await expect(page.locator('[data-prev]')).toBeDisabled();
     await page.locator('[data-next]').click();
-    await expect(page.locator('[data-count]')).toHaveText('QR payments · Step 2 of 3');
+    await expect(page.locator('[data-count]')).toHaveText('QR payments · 02 / 03');
+    await expect(page.locator('[data-notice] li')).toHaveCount(2);
+    await expect(page.locator('[data-notice]')).toContainText('explicit waiting state');
+    await expect(page.locator('[data-step-btn="1"]')).toHaveAttribute('aria-current', 'step');
     await expect(page.locator('[data-title]')).toHaveText('Awaiting confirmation');
     await expect(activeScreen(page)).toHaveAttribute('data-step', '1');
     await page.locator('[data-next]').click();
@@ -83,7 +90,26 @@ test.describe('showcase selection', () => {
     await expect(activeScreen(page)).toHaveAttribute('data-feature', 'cards');
     await expect(activeScreen(page)).toHaveAttribute('data-step', '0');
     await expect(page.locator('[data-title]')).toHaveText('Card information');
+    await expect(page.locator('[data-step-btn="0"] [data-step-title]')).toHaveText('Card information');
+    await expect(page.locator('[data-study-link]')).toHaveAttribute('href', /work\/card-management\/$/);
     await expect(activeScreen(page).locator('img')).toBeVisible();
+  });
+
+  test('step rail jumps directly to a screen', async ({ page }) => {
+    await page.goto('./');
+    await page.locator('[data-step-btn="2"]').click();
+    await expect(page.locator('[data-title]')).toHaveText('Receipt feedback');
+    await expect(page.locator('[data-step-btn="0"]')).toHaveAttribute('data-done', '');
+    await expect(page.locator('[data-next]')).toBeDisabled();
+  });
+
+  test('arrow keys step while focus is in the showcase', async ({ page }) => {
+    await page.goto('./');
+    await page.locator('[data-pick="qr"]').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('[data-title]')).toHaveText('Awaiting confirmation');
+    await page.keyboard.press('ArrowLeft');
+    await expect(page.locator('[data-title]')).toHaveText('Present the code');
   });
 
   test('controls work from the keyboard', async ({ page }) => {
@@ -101,14 +127,14 @@ test.describe('3D enhancement', () => {
     await waitFor3D(page);
     await page.getByRole('button', { name: 'Card management' }).click();
     await page.locator('[data-next]').click();
-    await expect(modeToggle(page)).toHaveText('Use 2D view');
-    await modeToggle(page).click();
+    await expect(view3d(page)).toHaveAttribute('aria-pressed', 'true');
+    await view2d(page).click();
     await expect(showcase(page)).toHaveAttribute('data-mode', '2d');
     await expect(page.locator('[data-phone-canvas]')).toHaveCount(0);
     await expect(activeScreen(page)).toHaveAttribute('data-feature', 'cards');
     await expect(activeScreen(page)).toHaveAttribute('data-step', '1');
     await expect(activeScreen(page).locator('img')).toBeVisible();
-    await modeToggle(page).click();
+    await view3d(page).click();
     await waitFor3D(page);
     await expect(page.locator('[data-title]')).toHaveText('Partial-data failure');
     expect(errors).toEqual([]);
@@ -124,7 +150,8 @@ test.describe('3D enhancement', () => {
     });
     await page.goto('./');
     await expect(statusMsg(page)).toContainText('3D view is not available');
-    await expect(modeToggle(page)).toBeHidden();
+    await expect(viewToggle(page)).toBeHidden();
+    await expect(retryBtn(page)).toBeHidden();
     await expect(showcase(page)).toHaveAttribute('data-mode', '2d');
     await expect(activeScreen(page).locator('img')).toBeVisible();
   });
@@ -137,13 +164,13 @@ test.describe('3D enhancement', () => {
     await page.locator('[data-next]').click();
     await expect(showcase(page)).toHaveAttribute('data-viewer-status', 'error', { timeout: 20_000 });
     await expect(showcase(page)).toHaveAttribute('data-mode', '2d');
-    await expect(statusMsg(page)).toContainText('could not start');
+    await expect(statusMsg(page)).toContainText('couldn’t start');
     await expect(activeScreen(page)).toHaveAttribute('data-step', '1');
     await expect(activeScreen(page).locator('img')).toBeVisible();
-    await expect(modeToggle(page)).toHaveText('Retry 3D');
+    await expect(retryBtn(page)).toBeVisible();
 
     await page.unroute('**/showcase/*.svg');
-    await modeToggle(page).click();
+    await retryBtn(page).click();
     await waitFor3D(page);
     await expect(page.locator('[data-title]')).toHaveText('Awaiting confirmation');
   });
@@ -177,8 +204,9 @@ test.describe('3D enhancement', () => {
     await page.goto('./');
     await page.waitForTimeout(3500);
     await expect(showcase(page)).toHaveAttribute('data-mode', '2d');
-    await expect(modeToggle(page)).toHaveText('Enable 3D');
-    await modeToggle(page).click();
+    await expect(view2d(page)).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-hint]')).toContainText('Reduced motion');
+    await view3d(page).click();
     await waitFor3D(page);
     await context.close();
   });
@@ -190,7 +218,8 @@ test.describe('3D enhancement', () => {
     await page.goto('./');
     await page.waitForTimeout(3500);
     await expect(showcase(page)).toHaveAttribute('data-mode', '2d');
-    await expect(modeToggle(page)).toHaveText('Enable 3D');
+    await expect(view2d(page)).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-hint]')).toContainText('Data saver');
   });
 
   test('narrow touch viewport waits for "Enable 3D" and keeps vertical scrolling', async ({ browser }) => {
@@ -201,8 +230,8 @@ test.describe('3D enhancement', () => {
     await page.waitForTimeout(3500);
     await expect(showcase(page)).toHaveAttribute('data-mode', '2d');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    await modeToggle(page).scrollIntoViewIfNeeded();
-    await modeToggle(page).tap();
+    await view3d(page).scrollIntoViewIfNeeded();
+    await view3d(page).tap();
     await waitFor3D(page);
     const touchAction = await page.locator('[data-phone-canvas]').evaluate((c) => getComputedStyle(c).touchAction);
     expect(touchAction).toBe('pan-y');
@@ -304,7 +333,10 @@ test.describe('without JavaScript', () => {
     await expect(page.locator('.screen figcaption').first()).toContainText('QR payments · 1/3');
     await expect(page.locator('.screen figcaption').nth(5)).toContainText('Card management · 3/3');
     await expect(page.locator('[data-theme-toggle]')).toBeHidden();
-    await expect(page.locator('.panel')).toBeHidden();
+    await expect(page.locator('.caption')).toBeHidden();
+    await expect(page.locator('.rail')).toBeHidden();
+    await expect(page.locator('.pin').first()).toBeHidden();
+    await expect(page.locator('.fc-pins').first()).toContainText('Source account confirmed');
     await expect(page.getByRole('heading', { name: 'Experience', exact: true })).toBeVisible();
     await expect(page.getByText('riowirawan19@gmail.com').first()).toBeVisible();
   });

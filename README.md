@@ -30,7 +30,7 @@ All public text comes from `src/content/`. The schemas in `src/content.config.ts
 
 - `profile.json` holds the name, title, summary, email, experience, education, courses and links. The homepage, footer and public CV all read from it. Add a profile link only after you have checked that its URL is correct.
 - `studies/*.md` holds the feature studies. The frontmatter holds the structured facts (context, contribution, team boundary, responsibilities, technologies). The Markdown body is the narrative. A file's name becomes its URL slug, under `/work/<slug>/`.
-- `walkthrough.json` holds the three illustrative screens per feature. The 2D gallery, the no-JS sequence and the Three.js textures all read from it.
+- `walkthrough.json` holds the three illustrative screens per feature. Each step also has up to three numbered `pins`; `x` and `y` are percentages of the screen. The pins appear on the phone in 2D and 3D, and their text fills the "What to notice" list. The 2D gallery, the no-JS sequence and the Three.js textures all read from it.
 
 **Content rules.** Only publish claims that have been confirmed. Leave out metrics, test authorship or ownership that have not been verified; don't add placeholders for them. Never copy production code, internal contracts, endpoints, screenshots or confidential diagrams.
 

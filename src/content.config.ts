@@ -67,6 +67,10 @@ const walkthrough = defineCollection({
           alt: nonEmpty,
           caption: nonEmpty,
           kind: z.enum(['illustration', 'approved-image']),
+          /** Numbered callouts on the screen; x/y are percentages of the screen. */
+          pins: z
+            .array(z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100), text: nonEmpty }))
+            .max(3),
         }),
       )
       .length(3),

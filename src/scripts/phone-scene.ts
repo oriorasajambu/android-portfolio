@@ -28,11 +28,18 @@ import {
 } from 'three';
 import type { FeatureId } from './viewer-state';
 
+/** A numbered callout on a screen; x/y are percentages of the screen. */
+export interface Pin {
+  x: number;
+  y: number;
+  text: string;
+}
+
 export interface PhoneSceneOptions {
   host: HTMLElement;
   /** Element that receives pointer tilt. */
   stage: HTMLElement;
-  textures: Record<FeatureId, string[]>;
+  screens: Record<FeatureId, { url: string; pins: Pin[] }[]>;
   initial: { feature: FeatureId; step: number };
   reducedMotion: () => boolean;
   mobile: () => boolean;
@@ -41,6 +48,7 @@ export interface PhoneSceneOptions {
 
 export interface PhoneScene {
   show(feature: FeatureId, step: number, opts?: { instant?: boolean }): void;
+  setTheme(dark: boolean): void;
   dispose(): void;
 }
 
@@ -48,7 +56,10 @@ const PHONE_W = 1.8;
 const PHONE_H = PHONE_W * (760 / 360) + 0.12;
 const SCREEN_W = PHONE_W - 0.1;
 const SCREEN_H = SCREEN_W * (760 / 360);
-const MAX_TILT = 0.2; // radians
+const MAX_TILT = 0.2; // radians, pointer range
+const REST_X = 0.08; // resting pose: a slight three-quarter view
+const REST_Y = -0.24;
+const TURN_KICK = 0.14; // small turn on each step change
 const TEX_W = 720;
 const TEX_H = 1520;
 
@@ -68,8 +79,32 @@ function roundedRect(w: number, h: number, r: number): Shape {
   return s;
 }
 
-/** Rasterize an illustration (SVG) into a canvas texture with rounded screen corners. */
-async function loadScreenTexture(url: string, maxAnisotropy: number): Promise<Texture> {
+function drawPins(ctx: CanvasRenderingContext2D, pins: Pin[]) {
+  pins.forEach((p, i) => {
+    const x = (p.x / 100) * TEX_W;
+    const y = (p.y / 100) * TEX_H;
+    ctx.beginPath();
+    ctx.arc(x, y, 50, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(22, 101, 52, 0.25)';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, 38, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, 33, 0, Math.PI * 2);
+    ctx.fillStyle = '#166534';
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = "800 34px 'Manrope Variable', 'Segoe UI', Roboto, sans-serif";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(i + 1), x, y + 1);
+  });
+}
+
+/** Rasterize an illustration (SVG) plus its pins into a canvas texture with rounded screen corners. */
+async function loadScreenTexture(url: string, pins: Pin[], maxAnisotropy: number): Promise<Texture> {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Texture request failed (${res.status}): ${url}`);
   const blob = await res.blob();
@@ -91,6 +126,7 @@ async function loadScreenTexture(url: string, maxAnisotropy: number): Promise<Te
     ctx.roundRect(0, 0, TEX_W, TEX_H, 64);
     ctx.clip();
     ctx.drawImage(img, 0, 0, TEX_W, TEX_H);
+    drawPins(ctx, pins);
     ctx.restore();
     const tex = new CanvasTexture(canvas);
     tex.colorSpace = SRGBColorSpace;
@@ -122,8 +158,9 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
   const textures = {} as Record<FeatureId, Texture[]>;
   try {
-    for (const [feature, urls] of Object.entries(opts.textures) as [FeatureId, string[]][]) {
-      textures[feature] = await Promise.all(urls.map((u) => loadScreenTexture(u, maxAniso)));
+    await document.fonts?.ready;
+    for (const [feature, list] of Object.entries(opts.screens) as [FeatureId, { url: string; pins: Pin[] }[]][]) {
+      textures[feature] = await Promise.all(list.map((sc) => loadScreenTexture(sc.url, sc.pins, maxAniso)));
     }
   } catch (err) {
     Object.values(textures).flat().forEach((t) => t.dispose());
@@ -140,6 +177,10 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
   const key = new DirectionalLight(0xffffff, 2.2);
   key.position.set(3, 4, 6);
   scene.add(key);
+  // Soft green rim from behind-left; only lit in the dark theme.
+  const rim = new DirectionalLight(new Color('#86efac'), 0);
+  rim.position.set(-4, 2, -3);
+  scene.add(rim);
 
   const phone = new Group();
   scene.add(phone);
@@ -155,7 +196,8 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
     }),
   );
   bodyGeo.translate(0, 0, -0.1);
-  const body = new Mesh(bodyGeo, track(new MeshStandardMaterial({ color: '#1d2621', roughness: 0.45, metalness: 0.35 })));
+  const bodyMat = track(new MeshStandardMaterial({ color: '#1d2621', roughness: 0.45, metalness: 0.35 }));
+  const body = new Mesh(bodyGeo, bodyMat);
   phone.add(body);
 
   const screenGeo = track(new PlaneGeometry(SCREEN_W, SCREEN_H));
@@ -206,7 +248,7 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
     tilt.x += (tilt.tx - tilt.x) * k;
     tilt.y += (tilt.ty - tilt.y) * k;
     if (Math.abs(tilt.tx - tilt.x) > 1e-4 || Math.abs(tilt.ty - tilt.y) > 1e-4) animating = true;
-    phone.rotation.set(tilt.x, tilt.y - 0.12, 0);
+    phone.rotation.set(REST_X + tilt.x, REST_Y + tilt.y, 0);
 
     if (fade) {
       const t = Math.min(1, (now - fade.start) / fade.dur);
@@ -270,6 +312,9 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
   };
   canvas.addEventListener('webglcontextlost', onLost);
 
+  const darkNow = document.documentElement.dataset['theme'] === 'dark';
+  rim.intensity = darkNow ? 3.2 : 0;
+  bodyMat.color.set(darkNow ? '#3a4740' : '#1d2621');
   resize();
   request();
 
@@ -291,7 +336,13 @@ export async function createPhoneScene(opts: PhoneSceneOptions): Promise<PhoneSc
         screenB.needsUpdate = true;
         screenB.opacity = 0;
         fade = { from: 0, start: performance.now(), dur: 260 };
+        tilt.y -= TURN_KICK; // eases back to the resting pose
       }
+      request();
+    },
+    setTheme(dark) {
+      rim.intensity = dark ? 3.2 : 0;
+      bodyMat.color.set(dark ? '#3a4740' : '#1d2621');
       request();
     },
     dispose() {

@@ -7,6 +7,9 @@ import { withBase } from '../lib/url';
 
 const profile = (await getEntry('profile', 'rio'))!.data;
 const studies = (await getCollection('studies')).sort((a, b) => a.data.order - b.data.order);
+const walkthroughs = await getCollection('walkthrough');
+const previewsFor = (walkthrough: string) => walkthroughs.find((w) => w.id === walkthrough)?.data.steps.map((s) => withBase(s.image)) ?? [];
+const current = profile.experience[0]!;
 
 const capabilities = [
   {
@@ -60,12 +63,11 @@ const supporting = ['MPM and CPM QR payments', 'QRIS Tap', 'QRIS Transfer', 'Cro
           <a class="btn" href="#work">View selected work</a>
           <a class="btn ghost" href={withBase(profile.cv.href)} download>Download CV</a>
         </div>
-        <ul class="chips" aria-label="Core technologies">
-          <li>Kotlin</li>
-          <li>Native Android</li>
-          <li>VIPER</li>
-          <li>Mobile banking</li>
-        </ul>
+        <dl class="facts">
+          <div><dt>Kotlin · VIPER</dt><dd>Native Android</dd></div>
+          <div><dt>{current.period}</dt><dd>{current.org}</dd></div>
+          <div><dt>{studies.length} feature studies</dt><dd>QR payments · Cards</dd></div>
+        </dl>
       </div>
       <div class="hero-showcase" id="showcase" aria-labelledby="showcase-title">
         <h2 id="showcase-title" class="visually-hidden">Illustrated feature walkthrough</h2>
@@ -85,6 +87,13 @@ const supporting = ['MPM and CPM QR payments', 'QRIS Tap', 'QRIS Transfer', 'Cro
         {
           studies.map((s) => (
             <article class="card study">
+              <div class="previews" aria-hidden="true">
+                {previewsFor(s.data.walkthrough).map((src) => (
+                  <img src={src} alt="" width="360" height="760" loading="lazy" decoding="async" />
+                ))}
+                <span class="label-illustration">Illustration</span>
+              </div>
+              <div class="study-body">
               <p class="eyebrow">{s.data.kicker}</p>
               <h3>
                 <a href={withBase(`work/${s.id}/`)}>{s.data.title}</a>
@@ -94,6 +103,7 @@ const supporting = ['MPM and CPM QR payments', 'QRIS Tap', 'QRIS Transfer', 'Cro
                 {s.data.technologies.map((t) => <li>{t}</li>)}
               </ul>
               <span class="more" aria-hidden="true">Read the study →</span>
+              </div>
             </article>
           ))
         }
@@ -205,11 +215,11 @@ const supporting = ['MPM and CPM QR payments', 'QRIS Tap', 'QRIS Transfer', 'Cro
 
 <style>
   .hero {
-    padding-block: clamp(40px, 7vw, 96px) clamp(48px, 7vw, 88px);
+    padding-block: clamp(28px, 4vw, 48px) clamp(48px, 7vw, 88px);
   }
   .hero-grid {
     display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
     gap: clamp(32px, 5vw, 72px);
     align-items: center;
   }
@@ -234,10 +244,89 @@ const supporting = ['MPM and CPM QR payments', 'QRIS Tap', 'QRIS Transfer', 'Cro
   }
   .study {
     position: relative;
-    padding: clamp(24px, 3vw, 36px);
+    overflow: hidden;
+    display: grid;
+    align-content: start;
+  }
+  .study-body {
+    padding: clamp(24px, 3vw, 32px);
     display: grid;
     gap: 0.5rem;
-    align-content: start;
+  }
+  .previews {
+    position: relative;
+    height: 230px;
+    background: var(--surface-2);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding-top: 28px;
+  }
+  .previews img {
+    width: 136px;
+    height: auto;
+    align-self: flex-start;
+    border-radius: 20px;
+    border: 6px solid #1b231e;
+    box-shadow: var(--shadow);
+  }
+  .previews img:first-child {
+    transform: rotate(-6deg) translateY(10px);
+  }
+  .previews img:nth-child(3) {
+    transform: rotate(6deg) translateY(10px);
+  }
+  .previews .label-illustration {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--surface);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .previews img {
+      transition: transform 0.25s ease;
+    }
+    .study:hover .previews img:first-child {
+      transform: rotate(-9deg) translate(-6px, 6px);
+    }
+    .study:hover .previews img:nth-child(3) {
+      transform: rotate(9deg) translate(6px, 6px);
+    }
+  }
+  @media (max-width: 520px) {
+    .previews img {
+      width: 104px;
+    }
+    .previews {
+      height: 190px;
+    }
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    margin: 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+  .facts dt {
+    font-weight: 700;
+    font-size: 0.98rem;
+  }
+  .facts dd {
+    margin: 0;
+    font-size: 0.86rem;
+    color: var(--muted);
+  }
+  @media (max-width: 560px) {
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .actions .btn {
+      padding-inline: 0.75rem;
+    }
   }
   .study h3 {
     font-size: 1.5rem;

@@ -10,7 +10,19 @@
         "image": "showcase/qr-present.svg",
         "alt": "Illustrated phone screen showing a payment QR code, a countdown until the code refreshes, and a masked source account.",
         "caption": "The customer shows a payment code at the counter. The screen keeps the code readable and makes its expiry visible.",
-        "kind": "illustration"
+        "kind": "illustration",
+        "pins": [
+          {
+            "x": 15,
+            "y": 18,
+            "text": "Source account confirmed before the cashier scans."
+          },
+          {
+            "x": 31,
+            "y": 67,
+            "text": "Expiry countdown, so a stale code is never a surprise."
+          }
+        ]
       },
       {
         "id": "qr-waiting",
@@ -18,7 +30,19 @@
         "image": "showcase/qr-waiting.svg",
         "alt": "Illustrated phone screen with a progress indicator reading 'Waiting for the merchant' and a note that the receipt will also arrive as a notification.",
         "caption": "After scanning, the result arrives asynchronously. The screen says what is happening and that a notification will follow if the app is closed.",
-        "kind": "illustration"
+        "kind": "illustration",
+        "pins": [
+          {
+            "x": 50,
+            "y": 33,
+            "text": "An explicit waiting state instead of a silent spinner."
+          },
+          {
+            "x": 13,
+            "y": 63,
+            "text": "Tells the customer they can leave — the receipt also arrives as a notification."
+          }
+        ]
       },
       {
         "id": "qr-receipt",
@@ -26,7 +50,19 @@
         "image": "showcase/qr-receipt.svg",
         "alt": "Illustrated phone screen showing a successful payment receipt with a sample merchant, amount and reference, above a notification banner.",
         "caption": "The outcome is confirmed with a receipt summary, whether the customer stayed on screen or returned from a notification.",
-        "kind": "illustration"
+        "kind": "illustration",
+        "pins": [
+          {
+            "x": 13,
+            "y": 17,
+            "text": "The notification path lands on the same receipt."
+          },
+          {
+            "x": 13,
+            "y": 57,
+            "text": "A reference to quote if anything goes wrong."
+          }
+        ]
       }
     ]
   },
@@ -41,7 +77,19 @@
         "image": "showcase/cards-available.svg",
         "alt": "Illustrated phone screen showing a sample card with masked number, status, and actions for block, activate and change PIN.",
         "caption": "Card details and the actions that apply to the card's current status appear together.",
-        "kind": "illustration"
+        "kind": "illustration",
+        "pins": [
+          {
+            "x": 50,
+            "y": 45,
+            "text": "Actions match the card's current status."
+          },
+          {
+            "x": 10,
+            "y": 58,
+            "text": "Details are loaded separately from the card itself."
+          }
+        ]
       },
       {
         "id": "cards-partial",
@@ -49,7 +97,19 @@
         "image": "showcase/cards-partial.svg",
         "alt": "Illustrated phone screen where the card summary is shown but one section reads 'Limit details unavailable' with a Retry button.",
         "caption": "When one part fails to load, the rest of the screen stays useful and the failed section offers its own retry.",
-        "kind": "illustration"
+        "kind": "illustration",
+        "pins": [
+          {
+            "x": 16,
+            "y": 59,
+            "text": "The failure stays inside its own section."
+          },
+          {
+            "x": 50,
+            "y": 45,
+            "text": "Block, activate and change PIN remain usable."
+          }
+        ]
       },
       {
         "id": "cards-recovered",
@@ -57,7 +117,19 @@
         "image": "showcase/cards-recovered.svg",
         "alt": "Illustrated phone screen with every section loaded, including the previously failed limit details.",
         "caption": "After a retry, the missing section is filled in and the rest of the screen stays where it was.",
-        "kind": "illustration"
+        "kind": "illustration",
+        "pins": [
+          {
+            "x": 10,
+            "y": 58,
+            "text": "The missing section is filled in — nothing else resets."
+          },
+          {
+            "x": 31,
+            "y": 81,
+            "text": "A quiet confirmation instead of a full-screen refresh."
+          }
+        ]
       }
     ]
   }
