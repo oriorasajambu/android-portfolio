@@ -1,0 +1,64 @@
+[
+  {
+    "id": "qr",
+    "label": "QR payments",
+    "study": "qr-payments",
+    "steps": [
+      {
+        "id": "qr-present",
+        "title": "Present the code",
+        "image": "showcase/qr-present.svg",
+        "alt": "Illustrated phone screen showing a payment QR code, a countdown until the code refreshes, and a masked source account.",
+        "caption": "The customer shows a payment code at the counter. The screen keeps the code readable and makes its expiry visible.",
+        "kind": "illustration"
+      },
+      {
+        "id": "qr-waiting",
+        "title": "Awaiting confirmation",
+        "image": "showcase/qr-waiting.svg",
+        "alt": "Illustrated phone screen with a progress indicator reading 'Waiting for the merchant' and a note that the receipt will also arrive as a notification.",
+        "caption": "After scanning, the result arrives asynchronously. The screen says what is happening and that a notification will follow if the app is closed.",
+        "kind": "illustration"
+      },
+      {
+        "id": "qr-receipt",
+        "title": "Receipt feedback",
+        "image": "showcase/qr-receipt.svg",
+        "alt": "Illustrated phone screen showing a successful payment receipt with a sample merchant, amount and reference, above a notification banner.",
+        "caption": "The outcome is confirmed with a receipt summary, whether the customer stayed on screen or returned from a notification.",
+        "kind": "illustration"
+      }
+    ]
+  },
+  {
+    "id": "cards",
+    "label": "Card management",
+    "study": "card-management",
+    "steps": [
+      {
+        "id": "cards-available",
+        "title": "Card information",
+        "image": "showcase/cards-available.svg",
+        "alt": "Illustrated phone screen showing a sample card with masked number, status, and actions for block, activate and change PIN.",
+        "caption": "Card details and the actions that apply to the card's current status appear together.",
+        "kind": "illustration"
+      },
+      {
+        "id": "cards-partial",
+        "title": "Partial-data failure",
+        "image": "showcase/cards-partial.svg",
+        "alt": "Illustrated phone screen where the card summary is shown but one section reads 'Limit details unavailable' with a Retry button.",
+        "caption": "When one part fails to load, the rest of the screen stays useful and the failed section offers its own retry.",
+        "kind": "illustration"
+      },
+      {
+        "id": "cards-recovered",
+        "title": "Recovered information",
+        "image": "showcase/cards-recovered.svg",
+        "alt": "Illustrated phone screen with every section loaded, including the previously failed limit details.",
+        "caption": "After a retry, the missing section is filled in and the rest of the screen stays where it was.",
+        "kind": "illustration"
+      }
+    ]
+  }
+]

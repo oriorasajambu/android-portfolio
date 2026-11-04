@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/url';
+---
+
+<Base title="Page not found — Rio Wirawan" description="This page does not exist." noindex>
+  <section class="wrap nf">
+    <p class="eyebrow">404</p>
+    <h1>This page isn't here.</h1>
+    <p class="lead">The link may be out of date. These pages are:</p>
+    <ul>
+      <li><a href={withBase()}>Home</a></li>
+      <li><a href={withBase('work/qr-payments/')}>QR payments and receipt feedback</a></li>
+      <li><a href={withBase('work/card-management/')}>Card management under partial failure</a></li>
+      <li><a href={withBase('#contact')}>Contact</a></li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    padding-block: clamp(64px, 12vw, 160px);
+  }
+  ul {
+    padding-left: 1.2rem;
+    font-size: 1.1rem;
+  }
+  li {
+    padding: 0.35rem 0;
+  }
+</style>

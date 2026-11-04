@@ -1,0 +1,40 @@
+<button type="button" class="theme-toggle" data-theme-toggle data-js-only aria-pressed="false">
+  <svg class="sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"
+    ><circle cx="12" cy="12" r="4.5" fill="currentColor"></circle><g stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      ><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></g
+    ></svg
+  >
+  <svg class="moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"
+    ><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="currentColor"></path></svg
+  >
+  <span class="visually-hidden">Dark theme</span>
+</button>
+
+<script>
+  import { initThemeToggle } from '../scripts/theme';
+  initThemeToggle();
+</script>
+
+<style>
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .moon {
+    display: none;
+  }
+  :global([data-theme='dark']) .moon {
+    display: block;
+  }
+  :global([data-theme='dark']) .sun {
+    display: none;
+  }
+</style>

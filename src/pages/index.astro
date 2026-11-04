@@ -1,0 +1,398 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Showcase from '../components/Showcase.astro';
+import CopyEmail from '../components/CopyEmail.astro';
+import { withBase } from '../lib/url';
+
+const profile = (await getEntry('profile', 'rio'))!.data;
+const studies = (await getCollection('studies')).sort((a, b) => a.data.order - b.data.order);
+
+const capabilities = [
+  {
+    title: 'Native Android in Kotlin',
+    body: 'Feature UI and integration built natively in Kotlin for a production mobile-banking application.',
+    evidence: 'Every OctoMobile feature listed under Experience.',
+  },
+  {
+    title: 'Structured feature architecture',
+    body: 'Features built within the VIPER architecture, keeping screen, presentation, business and navigation responsibilities separate.',
+    evidence: 'QR payments and card management, among others.',
+  },
+  {
+    title: 'Transaction feedback',
+    body: 'Making payment outcomes clear across app states, including receipts and summaries opened from push notifications.',
+    evidence: 'QR payments study.',
+    href: withBase('work/qr-payments/'),
+  },
+  {
+    title: 'Dependable data screens',
+    body: 'Screens that keep working while data loads, when one part fails, and while the customer retries.',
+    evidence: 'Card management study.',
+    href: withBase('work/card-management/'),
+  },
+  {
+    title: 'Verification and code review',
+    body: 'Testing builds before final review to verify that issues are resolved, and taking part in code review.',
+    evidence: 'Senior Android Developer role.',
+  },
+  {
+    title: 'Explaining technical work',
+    body: 'Client-facing freelance work from requirements to delivery, and teaching Android and desktop programming to more than 75 students.',
+    evidence: 'Freelance and instructor roles.',
+  },
+];
+
+const supporting = ['MPM and CPM QR payments', 'QRIS Tap', 'QRIS Transfer', 'Cross-border QR', 'Cardless withdrawal & deposit', 'Account details', 'Virtual card number', 'Point transfers'];
+---
+
+<Base
+  title={`${profile.name} — ${profile.title}`}
+  description={`${profile.name} is a ${profile.title.toLowerCase()} building native Kotlin features for mobile banking: QR payments, card management and transaction feedback.`}
+>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">{profile.title}</p>
+        <h1>{profile.name}</h1>
+        <p class="lead">{profile.summary}</p>
+        <div class="actions">
+          <a class="btn" href="#work">View selected work</a>
+          <a class="btn ghost" href={withBase(profile.cv.href)} download>Download CV</a>
+        </div>
+        <ul class="chips" aria-label="Core technologies">
+          <li>Kotlin</li>
+          <li>Native Android</li>
+          <li>VIPER</li>
+          <li>Mobile banking</li>
+        </ul>
+      </div>
+      <div class="hero-showcase" id="showcase" aria-labelledby="showcase-title">
+        <h2 id="showcase-title" class="visually-hidden">Illustrated feature walkthrough</h2>
+        <Showcase />
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="work" aria-labelledby="work-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Selected work</p>
+        <h2 id="work-title">Two feature studies from OctoMobile</h2>
+        <p>Both come from the same mobile-banking product and describe my implementation work on the Android client.</p>
+      </div>
+      <div class="studies">
+        {
+          studies.map((s) => (
+            <article class="card study">
+              <p class="eyebrow">{s.data.kicker}</p>
+              <h3>
+                <a href={withBase(`work/${s.id}/`)}>{s.data.title}</a>
+              </h3>
+              <p>{s.data.summary}</p>
+              <ul class="chips">
+                {s.data.technologies.map((t) => <li>{t}</li>)}
+              </ul>
+              <span class="more" aria-hidden="true">Read the study →</span>
+            </article>
+          ))
+        }
+      </div>
+      <div class="supporting">
+        <h3>Also shipped on OctoMobile</h3>
+        <ul class="chips">{supporting.map((s) => <li>{s}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="capabilities" aria-labelledby="cap-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Engineering capabilities</p>
+        <h2 id="cap-title">What I bring to an Android team</h2>
+      </div>
+      <ul class="caps">
+        {
+          capabilities.map((c) => (
+            <li class="card cap">
+              <h3>{c.title}</h3>
+              <p>{c.body}</p>
+              <p class="evidence">
+                <span>Evidence:</span> {c.href ? <a href={c.href}>{c.evidence}</a> : c.evidence}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="experience" aria-labelledby="exp-title">
+    <div class="wrap two-col">
+      <div>
+        <p class="eyebrow">Experience</p>
+        <h2 id="exp-title">Experience</h2>
+        <ol class="timeline">
+          {
+            profile.experience.map((e) => (
+              <li>
+                <p class="period">{e.period}</p>
+                <h3>{e.role}</h3>
+                <p class="org">{e.org}</p>
+                <p>{e.summary}</p>
+                <ul>
+                  {e.highlights.map((h) => <li>{h}</li>)}
+                </ul>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+      <div>
+        <p class="eyebrow">Education</p>
+        <h2>Education</h2>
+        <ul class="plain">
+          {
+            profile.education.map((ed) => (
+              <li class="card edu">
+                <h3>{ed.title}</h3>
+                <p class="org">{ed.org}</p>
+                <p class="period">{ed.period}</p>
+              </li>
+            ))
+          }
+        </ul>
+        <h3 class="sub">Courses</h3>
+        <ul class="courses">
+          {
+            profile.courses.map((c) => (
+              <li>
+                <span>{c.title}</span>
+                <span class="period">
+                  {c.provider} · {c.year}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+        <h3 class="sub">Languages</h3>
+        <p>{profile.languages.join(' · ')}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="contact" aria-labelledby="contact-title">
+    <div class="wrap contact">
+      <div>
+        <p class="eyebrow">About</p>
+        <h2 id="contact-title">About and contact</h2>
+        <p class="lead">
+          I'm an Android developer in mobile banking, working mostly on payments, cards and the feedback around transactions.
+          Before that I built web and mobile projects for clients and taught programming.
+        </p>
+        <p>If you'd like to talk about Android work, email is the best way to reach me.</p>
+      </div>
+      <div class="card contact-card">
+        <CopyEmail email={profile.email} />
+        <p class="cv-line">
+          <a href={withBase(profile.cv.href)} download>{profile.cv.label}</a>
+          {profile.links.map((l) => <> · <a href={l.href} rel="me noopener">{l.label}</a></>)}
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-block: clamp(40px, 7vw, 96px) clamp(48px, 7vw, 88px);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 2rem 0 1.75rem;
+  }
+  @media (max-width: 1000px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .alt {
+    background: var(--surface-2);
+  }
+  .studies {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+    gap: 1.5rem;
+  }
+  .study {
+    position: relative;
+    padding: clamp(24px, 3vw, 36px);
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+  }
+  .study h3 {
+    font-size: 1.5rem;
+  }
+  .study h3 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .study h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+  }
+  .study:hover {
+    border-color: var(--accent);
+  }
+  .study:focus-within {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+  .study h3 a:focus-visible {
+    outline: none;
+  }
+  .more {
+    margin-top: 0.75rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .supporting {
+    margin-top: 2.5rem;
+  }
+  .supporting h3 {
+    font-size: 1rem;
+    color: var(--ink-2);
+  }
+  .caps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 1.25rem;
+  }
+  .cap {
+    padding: 1.5rem;
+  }
+  .cap p {
+    color: var(--ink-2);
+    font-size: 0.98rem;
+  }
+  .evidence {
+    margin: 0;
+    font-size: 0.9rem !important;
+  }
+  .evidence span {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .two-col {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: clamp(32px, 6vw, 80px);
+  }
+  @media (max-width: 900px) {
+    .two-col {
+      grid-template-columns: 1fr;
+    }
+  }
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 2px solid var(--line);
+  }
+  .timeline > li {
+    position: relative;
+    padding: 0 0 2.25rem 1.75rem;
+  }
+  .timeline > li::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 0.35rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--bg);
+  }
+  .timeline h3 {
+    margin-bottom: 0.1rem;
+  }
+  .timeline ul {
+    padding-left: 1.1rem;
+    color: var(--ink-2);
+    font-size: 0.98rem;
+  }
+  .timeline ul li + li {
+    margin-top: 0.3rem;
+  }
+  .period {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0 0 0.25rem;
+  }
+  .org {
+    font-weight: 600;
+    color: var(--ink-2);
+    margin-bottom: 0.5rem;
+  }
+  .plain {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .edu {
+    padding: 1.25rem 1.5rem;
+  }
+  .edu p {
+    margin: 0;
+  }
+  .sub {
+    margin-top: 2rem;
+    font-size: 1.05rem;
+  }
+  .courses {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .courses li {
+    display: grid;
+    font-size: 0.97rem;
+  }
+  .contact {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(32px, 6vw, 80px);
+    align-items: center;
+  }
+  @media (max-width: 900px) {
+    .contact {
+      grid-template-columns: 1fr;
+    }
+  }
+  .contact-card {
+    padding: clamp(24px, 3vw, 36px);
+  }
+  .cv-line {
+    margin: 0.5rem 0 0;
+    font-weight: 600;
+  }
+</style>

@@ -1,0 +1,255 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { withBase } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const studies = await getCollection('studies');
+  return studies.map((s) => ({ params: { slug: s.id } }));
+}
+
+const { slug } = Astro.params;
+const study = (await getEntry('studies', slug!))!;
+const { Content } = await render(study);
+const d = study.data;
+const walk = (await getEntry('walkthrough', d.walkthrough))!.data;
+const others = (await getCollection('studies')).filter((s) => s.id !== study.id);
+---
+
+<Base title={`${d.title} — Rio Wirawan`} description={d.summary} path={`work/${study.id}/`}>
+  <article class="study">
+    <header class="wrap head">
+      <nav aria-label="Breadcrumb" class="crumbs">
+        <a href={withBase()}>Home</a> <span aria-hidden="true">/</span> <a href={withBase('#work')}>Work</a>
+      </nav>
+      <p class="eyebrow">{d.kicker}</p>
+      <h1>{d.title}</h1>
+      <p class="lead">{d.summary}</p>
+      <ul class="chips" aria-label="Technologies">{d.technologies.map((t) => <li>{t}</li>)}</ul>
+    </header>
+
+    <section class="wrap facts" aria-label="Study overview">
+      <dl class="card">
+        <div><dt>Product</dt><dd>{d.product}</dd></div>
+        <div><dt>Context</dt><dd>{d.context}</dd></div>
+        <div><dt>User task</dt><dd>{d.userTask}</dd></div>
+        <div><dt>My contribution</dt><dd>{d.contribution}</dd></div>
+        <div><dt>Team boundary</dt><dd>{d.teamBoundary}</dd></div>
+      </dl>
+      <div class="card resp">
+        <h2>Implementation responsibilities</h2>
+        <ul>{d.responsibilities.map((r) => <li>{r}</li>)}</ul>
+      </div>
+    </section>
+
+    <section class="wrap sequence" aria-labelledby="seq-title">
+      <div class="seq-head">
+        <h2 id="seq-title">Illustrated sequence</h2>
+        <span class="label-illustration">Illustration · synthetic data · not the production app</span>
+      </div>
+      <ol class="seq">
+        {
+          walk.steps.map((s, i) => (
+            <li>
+              <figure>
+                <img src={withBase(s.image)} alt={s.alt} width="360" height="760" loading="lazy" decoding="async" />
+                <figcaption>
+                  <span class="n">{i + 1}</span>
+                  <strong>{s.title}.</strong> {s.caption}
+                </figcaption>
+              </figure>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="wrap prose">
+      <figure class="diagram">
+        <img src={withBase(d.diagram.src)} alt={d.diagram.alt} width="880" height="400" loading="lazy" decoding="async" />
+        <figcaption>{d.diagram.caption}</figcaption>
+      </figure>
+      <Content />
+    </section>
+
+    <nav class="wrap next" aria-label="More work">
+      {
+        others.map((o) => (
+          <a class="card next-card" href={withBase(`work/${o.id}/`)}>
+            <span class="eyebrow">Next study</span>
+            <span class="t">{o.data.title} →</span>
+          </a>
+        ))
+      }
+      <a class="card next-card" href={withBase('#contact')}>
+        <span class="eyebrow">Get in touch</span>
+        <span class="t">Contact Rio →</span>
+      </a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .head {
+    padding-top: clamp(32px, 6vw, 72px);
+  }
+  .head .lead {
+    max-width: var(--measure);
+  }
+  .crumbs {
+    font-size: 0.92rem;
+    margin-bottom: 1.5rem;
+    color: var(--muted);
+  }
+  .crumbs a {
+    display: inline-block;
+    padding: 0.5rem 0;
+  }
+  .facts {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+  @media (max-width: 900px) {
+    .facts {
+      grid-template-columns: 1fr;
+    }
+  }
+  dl {
+    margin: 0;
+    padding: clamp(20px, 3vw, 32px);
+    display: grid;
+    gap: 1.1rem;
+  }
+  dt {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  dd {
+    margin: 0.15rem 0 0;
+  }
+  .resp {
+    padding: clamp(20px, 3vw, 32px);
+  }
+  .resp h2 {
+    font-size: 1.25rem;
+  }
+  .resp ul {
+    padding-left: 1.1rem;
+    margin: 0;
+    color: var(--ink-2);
+  }
+  .resp li + li {
+    margin-top: 0.5rem;
+  }
+  .sequence {
+    margin-top: clamp(48px, 8vw, 96px);
+  }
+  .seq-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .seq-head h2 {
+    margin: 0;
+  }
+  .seq {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(16px, 3vw, 32px);
+  }
+  @media (max-width: 760px) {
+    .seq {
+      grid-template-columns: minmax(0, 300px);
+      justify-content: center;
+    }
+  }
+  .seq figure {
+    margin: 0;
+  }
+  .seq img {
+    display: block;
+    width: 100%;
+    border-radius: 28px;
+    border: 8px solid #1b231e;
+    box-shadow: var(--shadow);
+  }
+  .seq figcaption {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    color: var(--ink-2);
+  }
+  .n {
+    display: inline-grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin-right: 0.4rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+  .prose {
+    margin-top: clamp(48px, 8vw, 96px);
+    max-width: calc(var(--measure) + 2 * var(--gutter));
+  }
+  .prose :global(h2) {
+    margin-top: 2.2em;
+    font-size: 1.6rem;
+  }
+  .prose :global(li + li) {
+    margin-top: 0.4rem;
+  }
+  .prose :global(em) {
+    color: var(--muted);
+  }
+  .diagram {
+    margin: 0 0 1rem;
+    width: min(100vw - 2 * var(--gutter), 880px);
+  }
+  .diagram img {
+    display: block;
+    width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+  }
+  .diagram figcaption {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .next {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 1.25rem;
+    padding-block: clamp(48px, 8vw, 96px);
+  }
+  .next-card {
+    display: grid;
+    gap: 0.25rem;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .next-card .eyebrow {
+    margin: 0;
+  }
+  .next-card .t {
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+  .next-card:hover {
+    border-color: var(--accent);
+  }
+</style>

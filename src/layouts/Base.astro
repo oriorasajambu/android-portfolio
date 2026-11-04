@@ -1,0 +1,204 @@
+---
+import '@fontsource-variable/manrope/wght.css';
+import '../styles/global.css';
+import { getEntry } from 'astro:content';
+import { withBase } from '../lib/url';
+import ThemeToggle from '../components/ThemeToggle.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path relative to the site base, e.g. "work/qr-payments/". */
+  path?: string;
+  noindex?: boolean;
+}
+
+const { title, description, path = '', noindex = false } = Astro.props;
+const profile = (await getEntry('profile', 'rio'))!.data;
+const canonical = new URL(withBase(path), Astro.site).href;
+const ogImage = new URL(withBase('og.png'), Astro.site).href;
+const nav = [
+  { href: withBase('#work'), label: 'Work' },
+  { href: withBase('#capabilities'), label: 'Capabilities' },
+  { href: withBase('#experience'), label: 'Experience' },
+  { href: withBase('#contact'), label: 'Contact' },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#F7F8F4" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#101713" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={withBase('sitemap.xml')} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Apply the stored or system theme before first paint. Storage may be unavailable. -->
+    <script is:inline>
+      (function () {
+        document.documentElement.classList.add('js');
+        var t = null;
+        try {
+          t = localStorage.getItem('theme');
+        } catch (e) {}
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <noscript><style>[data-js-only]{display:none!important}</style></noscript>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="brand" href={withBase()} aria-label={`${profile.name} — home`}>
+          <span class="mark" aria-hidden="true">RW</span>
+          <span>{profile.name}</span>
+        </a>
+        <nav aria-label="Primary">
+          <ul>
+            {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+          </ul>
+        </nav>
+        <ThemeToggle />
+      </div>
+    </header>
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap foot">
+        <p>© {new Date().getFullYear()} {profile.name}. Phone screens on this site are original illustrations with synthetic data.</p>
+        <p>
+          <a href={`mailto:${profile.email}`}>{profile.email}</a>
+          {profile.links.map((l) => <> · <a href={l.href} rel="me noopener">{l.label}</a></>)}
+          · <a href={withBase(profile.cv.href)} download>CV (PDF)</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: absolute;
+    left: 16px;
+    top: -60px;
+    z-index: 100;
+    padding: 0.7rem 1rem;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-radius: 10px;
+    font-weight: 700;
+  }
+  .skip:focus {
+    top: 12px;
+  }
+  main:focus {
+    outline: none;
+  }
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 68px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--ink);
+    font-weight: 800;
+    text-decoration: none;
+    min-height: 44px;
+  }
+  .mark {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+  }
+  nav {
+    margin-left: auto;
+  }
+  nav ul {
+    display: flex;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.75rem;
+    border-radius: 10px;
+    color: var(--ink-2);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+  nav a:hover {
+    color: var(--ink);
+    background: var(--surface-2);
+  }
+  @media (max-width: 720px) {
+    .brand span:last-child {
+      display: none;
+    }
+    nav ul {
+      gap: 0;
+    }
+    nav a {
+      padding: 0 0.5rem;
+      font-size: 0.88rem;
+    }
+  }
+  @media (max-width: 420px) {
+    nav li:nth-child(2) {
+      display: none;
+    }
+  }
+  .site-footer {
+    border-top: 1px solid var(--line);
+    padding-block: 2rem;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+  }
+  .foot p {
+    margin: 0;
+  }
+</style>

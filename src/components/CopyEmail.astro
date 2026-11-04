@@ -1,0 +1,62 @@
+---
+interface Props {
+  email: string;
+}
+const { email } = Astro.props;
+---
+
+<div class="copy-email">
+  <a class="btn" href={`mailto:${email}`}>Email me</a>
+  <span class="addr" data-email-text>{email}</span>
+  <button type="button" class="btn ghost" data-copy-email={email} data-js-only>Copy email</button>
+  <p class="feedback" data-copy-feedback role="status" aria-live="polite"></p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-copy-email]').forEach((btn) => {
+    const wrap = btn.closest('.copy-email')!;
+    const feedback = wrap.querySelector<HTMLElement>('[data-copy-feedback]')!;
+    const text = wrap.querySelector<HTMLElement>('[data-email-text]')!;
+    btn.addEventListener('click', async () => {
+      const email = btn.dataset['copyEmail'] ?? '';
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
+        await navigator.clipboard.writeText(email);
+        feedback.textContent = 'Email address copied.';
+      } catch {
+        // Fall back to a selected, copyable address.
+        const range = document.createRange();
+        range.selectNodeContents(text);
+        const sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+        feedback.textContent = 'Copying is not available here — the address is selected so you can copy it.';
+      }
+    });
+  });
+</script>
+
+<style>
+  .copy-email {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+  }
+  .addr {
+    font-family: var(--mono);
+    font-size: 0.98rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 10px;
+    background: var(--surface-2);
+    user-select: all;
+    overflow-wrap: anywhere;
+  }
+  .feedback {
+    flex-basis: 100%;
+    margin: 0;
+    min-height: 1.5em;
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
+</style>

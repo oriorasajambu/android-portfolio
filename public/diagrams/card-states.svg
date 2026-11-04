@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="400" viewBox="0 0 880 400" font-family="Manrope, 'Segoe UI', Roboto, Arial, sans-serif" role="img">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5B675F"/></marker></defs><rect width="880" height="400" rx="20" fill="#F4F6F1"/>
+<text x="40" y="50" font-size="14" font-weight="700" fill="#5B675F" text-anchor="start">One section of the screen</text>
+<rect x="60" y="150" width="170" height="80" rx="14" fill="#FFFFFF" stroke="#DCE3DA"/><text x="145" y="188" font-size="15" font-weight="700" fill="#16201A" text-anchor="middle">Loading</text><text x="145" y="208" font-size="12" font-weight="500" fill="#5B675F" text-anchor="middle">section placeholder</text>
+<rect x="370" y="70" width="190" height="80" rx="14" fill="#DCFCE7" stroke="#166534"/><text x="465" y="108" font-size="15" font-weight="700" fill="#166534" text-anchor="middle">Loaded</text><text x="465" y="128" font-size="12" font-weight="500" fill="#5B675F" text-anchor="middle">content + actions</text>
+<rect x="370" y="230" width="190" height="80" rx="14" fill="#FFEDD5" stroke="#9A3412"/><text x="465" y="268" font-size="15" font-weight="700" fill="#9A3412" text-anchor="middle">Failed</text><text x="465" y="288" font-size="12" font-weight="500" fill="#5B675F" text-anchor="middle">message in place</text>
+<path d="M230 180 L366 110" stroke="#5B675F" stroke-width="2" fill="none" marker-end="url(#ah)"/><text x="298" y="137" font-size="12" font-weight="500" fill="#5B675F" text-anchor="middle">success</text><path d="M230 200 L366 270" stroke="#5B675F" stroke-width="2" fill="none" marker-end="url(#ah)"/><text x="298" y="227" font-size="12" font-weight="500" fill="#5B675F" text-anchor="middle">error</text>
+<path d="M370 300 C 260 360, 150 330, 145 234" stroke="#5B675F" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+<text x="250" y="356" font-size="12" font-weight="500" fill="#5B675F" text-anchor="middle">Retry (this section only)</text>
+<rect x="640" y="90" width="200" height="210" rx="14" fill="#FFFFFF" stroke="#DCE3DA"/>
+<text x="740" y="122" font-size="14" font-weight="700" fill="#16201A" text-anchor="middle">Other sections</text>
+<rect x="664" y="140" width="152" height="36" rx="10" fill="#DCFCE7" stroke="none"/><text x="740" y="163" font-size="12.5" font-weight="600" fill="#166534" text-anchor="middle">Card summary ✓</text><rect x="664" y="190" width="152" height="36" rx="10" fill="#DCFCE7" stroke="none"/><text x="740" y="213" font-size="12.5" font-weight="600" fill="#166534" text-anchor="middle">Card actions ✓</text><rect x="664" y="240" width="152" height="36" rx="10" fill="#DCFCE7" stroke="none"/><text x="740" y="263" font-size="12.5" font-weight="600" fill="#166534" text-anchor="middle">Account info ✓</text>
+<text x="740" y="330" font-size="12" font-weight="500" fill="#5B675F" text-anchor="middle">stay usable meanwhile</text>
+<text x="440" y="384" font-size="12" font-weight="500" fill="#5B675F" text-anchor="middle">Original explanatory diagram — not a production architecture.</text>
+</svg>

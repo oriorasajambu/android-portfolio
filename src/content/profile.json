@@ -1,0 +1,62 @@
+[
+  {
+    "id": "rio",
+    "name": "Rio Wirawan",
+    "title": "Senior Android Developer",
+    "tagline": "Native Android features for mobile banking.",
+    "summary": "I build native Android features in Kotlin for OctoMobile, a mobile-banking application — including QR payments, card management, cardless transactions, and the receipts and feedback around them.",
+    "email": "riowirawan19@gmail.com",
+    "cv": { "href": "rio-wirawan-cv.pdf", "label": "Download CV (PDF)" },
+    "links": [{ "label": "GitHub", "href": "https://github.com/oriorasajambu" }],
+    "languages": ["Indonesian", "English"],
+    "experience": [
+      {
+        "role": "Senior Android Developer",
+        "org": "PT. Infosys Solusi Terpadu",
+        "period": "2021 – Present",
+        "summary": "UI and integration work in Kotlin with the VIPER architecture for the OctoMobile mobile-banking application.",
+        "highlights": [
+          "QR payments: QRIS and cross-border QR, merchant- and customer-presented flows, QRIS Tap and QRIS Transfer.",
+          "QR receive-money, send-money and customer-presented QR generation, with receipts and summaries delivered through push notifications.",
+          "Card management for debit and credit cards: block, activate and change PIN.",
+          "Account detail screens for credit cards, savings and current accounts, and time deposits.",
+          "Cardless withdrawal and deposit, including viewing active codes.",
+          "Point transfers, virtual card numbers, and credit-card, loan and loan top-up application flows.",
+          "Testing builds before final review to verify issue resolution, and taking part in code review."
+        ]
+      },
+      {
+        "role": "Freelance Developer",
+        "org": "Self-employed",
+        "period": "2020 – 2021",
+        "summary": "Web and mobile projects for clients, from requirements to delivery.",
+        "highlights": [
+          "Defined requirements and deliverables with clients and agreed fees and contracts.",
+          "Implemented user-interface designs and new features for web and mobile applications.",
+          "Optimized performance and debugged production issues to minimize disruption.",
+          "Used client feedback to identify improvements."
+        ]
+      },
+      {
+        "role": "Programming Instructor",
+        "org": "CV. Dhuo Creative",
+        "period": "2019 – 2020",
+        "summary": "Taught Android and desktop programming to university and high-school students.",
+        "highlights": [
+          "Planned and delivered curriculum for more than 75 students.",
+          "Designed classes, and prepared and graded examinations and assignments."
+        ]
+      }
+    ],
+    "education": [
+      { "title": "Bachelor of Science", "org": "Universitas Pembangunan Pancabudi", "period": "2020 – 2025" }
+    ],
+    "courses": [
+      { "title": "The Complete Android 12 & Kotlin Development Masterclass", "provider": "Online course", "year": 2022 },
+      { "title": "Kotlin Programming", "provider": "Dicoding", "year": 2022 },
+      { "title": "Theoretical and Practical Understanding of Kotlin", "provider": "Sololearn", "year": 2022 },
+      { "title": "SQL", "provider": "Sololearn", "year": 2022 },
+      { "title": "PHP", "provider": "Sololearn", "year": 2022 }
+    ]
+  }
+]

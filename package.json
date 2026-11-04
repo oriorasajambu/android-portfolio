@@ -1,0 +1,32 @@
+{
+  "name": "android-portfolio",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview --port 4321",
+    "check": "astro check",
+    "check:budget": "node scripts/check-budget.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "check:cv": "python -I scripts/verify_cv.py",
+    "cv:build": "node scripts/build-cv.mjs && python -I scripts/clean_cv.py",
+    "test": "playwright test",
+    "verify": "npm run check && npm run build && npm run check:budget && npm run check:links && npm run test"
+  },
+  "dependencies": {
+    "@fontsource-variable/manrope": "^5.3.0",
+    "astro": "^7.4.5",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@playwright/test": "^1.64.1",
+    "@types/three": "^0.187.0",
+    "typescript": "^6.0.3"
+  }
+}
